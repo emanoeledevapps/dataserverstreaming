@@ -27,11 +27,13 @@ export async function feedbackRoutes(fastify: FastifyInstance){
         return reply.status(201).send();
     })
 
-
     fastify.get('/feedback', async (request, reply) => {
         const feedbacks = await prisma.feedback.findMany({
             orderBy:{
                 createdAt: 'desc'
+            },
+            include:{
+                CommentsFeedback: true
             }
         })
 
@@ -58,6 +60,45 @@ export async function feedbackRoutes(fastify: FastifyInstance){
         return reply.status(200).send();
     })
 
+    fastify.post('/feedback/comment', async (request, reply) => {
+        const createCommentProps = z.object({
+            walletAuthor: z.string(),
+            comment: z.string(),
+            feedbackId: z.string(),
+        });
+    
+        const {walletAuthor, comment, feedbackId} = createCommentProps.parse(request.body);
+    
+        const createComment = await prisma.commentsFeedback.create({
+            data:{
+                walletAuthor: walletAuthor.toUpperCase(),
+                comment,
+                feedbackId
+            }
+        })
+    
+        return reply.status(201).send({createComment});
+    });
+
+    fastify.get('/feedback/comments/:feedbackId', async (request, reply) => {
+        const findCommentProps = z.object({
+            feedbackId: z.string()
+        });
+    
+        const {feedbackId} = findCommentProps.parse(request.params);
+    
+        const comments = await prisma.commentsFeedback.findMany({
+            where:{
+                feedbackId
+            },
+            orderBy:{
+                createdAt: 'desc'
+            }
+        });
+
+        return {comments}
+    })
+
     fastify.post('/request-faucet', async (request, reply) => {
         const requestProps = z.object({
             wallet: z.string(),
@@ -73,7 +114,6 @@ export async function feedbackRoutes(fastify: FastifyInstance){
     
         return reply.status(201).send();
     })
-
 
     fastify.get('/request-faucet', async (request, reply) => {
         const requests = await prisma.requestFaucet.findMany({
