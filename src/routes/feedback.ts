@@ -10,13 +10,15 @@ export async function feedbackRoutes(fastify: FastifyInstance){
             description: z.string(),
             wallet: z.string(),
             photoHash: z.string(),
-
         });
     
         const {title, description, wallet, photoHash} = createFeedbackProps.parse(request.body);
+
+        const feedbacks = await prisma.feedback.findMany();
     
-        await prisma.feedback.create({
+        const feedback = await prisma.feedback.create({
             data:{
+                id: feedbacks.length + 1,
                 title,
                 description,
                 wallet,
@@ -24,7 +26,7 @@ export async function feedbackRoutes(fastify: FastifyInstance){
             }
         })
     
-        return reply.status(201).send();
+        return reply.status(201).send({feedback});
     })
 
     fastify.get('/feedback', async (request, reply) => {
@@ -42,7 +44,7 @@ export async function feedbackRoutes(fastify: FastifyInstance){
 
     fastify.put('/feedback/status', async (request, reply) => {
         const updateFeedbackProps = z.object({
-            id: z.string(),
+            id: z.number(),
             status: z.number(),
         });
     
@@ -60,11 +62,32 @@ export async function feedbackRoutes(fastify: FastifyInstance){
         return reply.status(200).send();
     })
 
+    fastify.put('/feedback/assign', async (request, reply) => {
+        const updateFeedbackProps = z.object({
+            id: z.number(),
+            wallet: z.string(),
+        });
+    
+        const {id, wallet} = updateFeedbackProps.parse(request.body);
+    
+        const feedbackUpdated = await prisma.feedback.update({
+            where:{
+                id
+            },
+            data:{
+                responsible: wallet.toUpperCase()
+            }
+        })
+    
+        return reply.status(200).send({feedbackUpdated});
+    })
+    
+    //Comentários feedbacks
     fastify.post('/feedback/comment', async (request, reply) => {
         const createCommentProps = z.object({
             walletAuthor: z.string(),
             comment: z.string(),
-            feedbackId: z.string(),
+            feedbackId: z.number(),
         });
     
         const {walletAuthor, comment, feedbackId} = createCommentProps.parse(request.body);
@@ -82,7 +105,7 @@ export async function feedbackRoutes(fastify: FastifyInstance){
 
     fastify.get('/feedback/comments/:feedbackId', async (request, reply) => {
         const findCommentProps = z.object({
-            feedbackId: z.string()
+            feedbackId: z.number()
         });
     
         const {feedbackId} = findCommentProps.parse(request.params);
@@ -99,6 +122,7 @@ export async function feedbackRoutes(fastify: FastifyInstance){
         return {comments}
     })
 
+    //Rotas dos faucets (Somente na fase de testes, na mainnet sera removida)
     fastify.post('/request-faucet', async (request, reply) => {
         const requestProps = z.object({
             wallet: z.string(),
