@@ -10,9 +10,12 @@ export async function feedbackRoutes(fastify: FastifyInstance){
             description: z.string(),
             wallet: z.string(),
             photoHash: z.string(),
+            type: z.string(),
+            priority: z.number().optional(),
+            team: z.number().optional(),
         });
     
-        const {title, description, wallet, photoHash} = createFeedbackProps.parse(request.body);
+        const {title, description, wallet, photoHash, type, priority, team} = createFeedbackProps.parse(request.body);
 
         const feedbacks = await prisma.feedback.findMany();
     
@@ -22,7 +25,10 @@ export async function feedbackRoutes(fastify: FastifyInstance){
                 title,
                 description,
                 wallet,
-                photoHash
+                photoHash,
+                type,
+                priority,
+                team
             }
         })
     
@@ -105,14 +111,14 @@ export async function feedbackRoutes(fastify: FastifyInstance){
 
     fastify.get('/feedback/comments/:feedbackId', async (request, reply) => {
         const findCommentProps = z.object({
-            feedbackId: z.number()
+            feedbackId: z.string()
         });
     
         const {feedbackId} = findCommentProps.parse(request.params);
     
         const comments = await prisma.commentsFeedback.findMany({
             where:{
-                feedbackId
+                feedbackId: Number(feedbackId)
             },
             orderBy:{
                 createdAt: 'desc'
