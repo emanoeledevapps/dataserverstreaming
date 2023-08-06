@@ -23,8 +23,9 @@ model User {
   address             String?
   level               Int      @default(0)
 
-  Delations   Delation[]
-  Inspections Inspection[]
+  Delations     Delation[]
+  Inspections   Inspection[]
+  Notifications Notification[]
 }
 
 model Delation {
@@ -145,6 +146,18 @@ model CommentsFeedback {
   feedbackId   Int
 
   feedback Feedback @relation(fields: [feedbackId], references: [id])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  from       String?
+  for        String
+  type       String
+  data       String
+  visualized Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [for], references: [wallet])
 }
 
 model RequestFaucet {
