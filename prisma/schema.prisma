@@ -166,3 +166,9 @@ model RequestFaucet {
   createdAt DateTime @default(now())
   status    Int      @default(0)
 }
+
+model Quote {
+  id         String   @id @default(cuid())
+  reservedBy String?
+  createdAt  DateTime @default(now())
+}

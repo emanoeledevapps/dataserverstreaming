@@ -2,6 +2,7 @@ import {FastifyInstance} from 'fastify';
 import { prisma } from '../lib/prisma';
 import {z} from 'zod';
 import { authenticated } from '../plugins/authenticated';
+import { pushNotification } from '../plugins/pushNotification';
 
 export async function feedbackRoutes(fastify: FastifyInstance){
     fastify.post('/feedback', async (request, reply) => {
@@ -97,6 +98,18 @@ export async function feedbackRoutes(fastify: FastifyInstance){
         });
     
         const {walletAuthor, comment, feedbackId} = createCommentProps.parse(request.body);
+
+        const feedback = await prisma.feedback.findUnique({
+            where:{
+                id: feedbackId,
+            }
+        });
+
+        let involvedWallets = [];
+        if(feedback?.responsible){
+            involvedWallets = JSON.parse(feedback?.responsible);
+        }
+        involvedWallets.push(feedback?.wallet);
     
         const createComment = await prisma.commentsFeedback.create({
             data:{
@@ -104,7 +117,19 @@ export async function feedbackRoutes(fastify: FastifyInstance){
                 comment,
                 feedbackId
             }
-        })
+        });
+
+        const dataComment = {
+            text1: `Commented on the task`,
+            text2: `#${feedback?.id} - ${feedback?.title}`
+        }
+        const dataNotification = {
+            for: involvedWallets,
+            from: walletAuthor.toUpperCase(),
+            type: 'comment-feedback',
+            data: JSON.stringify(dataComment)
+        }
+        await pushNotification(dataNotification);
     
         return reply.status(201).send({createComment});
     });
