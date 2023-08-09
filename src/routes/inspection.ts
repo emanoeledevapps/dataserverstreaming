@@ -192,7 +192,7 @@ export async function inspectionRoutes(fastify: FastifyInstance){
         });
         const {method} = inspectionParams.parse(request.params);
         
-        const inspections = await prisma.inspection.findFirst({
+        const inspections = await prisma.inspection.findMany({
             where:{
                 methodType: method
             }
