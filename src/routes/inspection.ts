@@ -185,4 +185,18 @@ export async function inspectionRoutes(fastify: FastifyInstance){
         })
         return {inspection}
     });
+
+    fastify.get('/inspections/method/:method', async (request, reply) => {
+        const inspectionParams = z.object({
+            method: z.string()
+        });
+        const {method} = inspectionParams.parse(request.params);
+        
+        const inspections = await prisma.inspection.findFirst({
+            where:{
+                methodType: method
+            }
+        })
+        return {inspections}
+    });
 }
