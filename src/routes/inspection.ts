@@ -199,4 +199,13 @@ export async function inspectionRoutes(fastify: FastifyInstance){
         })
         return {inspections}
     });
+
+    fastify.get('/inspections/finished-inspections', async (request, reply) => {
+        const inspections = await prisma.inspection.findMany({
+            where:{
+                status: 2
+            }
+        })
+        return {inspections}
+    });
 }

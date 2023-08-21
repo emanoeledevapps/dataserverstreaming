@@ -39,21 +39,33 @@ export async function userRoutes(fastify: FastifyInstance){
             where:{
                 userType: 1
             }
-        })
+        });
 
-        const activistsCount = await prisma.user.count({
+        const inspectorsCount = await prisma.user.count({
             where:{
                 userType: 2
             }
-        })
+        });
 
         const researchersCount = await prisma.user.count({
             where:{
-                userType: 2
+                userType: 3
             }
-        })
+        });
 
-        return{producersCount, activistsCount, researchersCount}
+        const developersCount = await prisma.user.count({
+            where:{
+                userType: 4
+            }
+        });
+
+        const validatorsCount = await prisma.user.count({
+            where:{
+                userType: 6
+            }
+        });
+
+        return{producersCount, inspectorsCount, researchersCount, developersCount, validatorsCount}
     })
 
     fastify.put('/user/level', async (request, reply) => {
@@ -103,5 +115,39 @@ export async function userRoutes(fastify: FastifyInstance){
         })
 
         return reply.status(200).send();
+    })
+
+    fastify.post('/request-register', async (request, reply) => {
+        const resquestProps = z.object({
+            name: z.string(),
+            email: z.string(),
+            tel: z.string(),
+            question: z.string(),
+            typeUser: z.string()
+        });
+
+        const {name, email, tel, question, typeUser} = resquestProps.parse(request.body);
+
+        const requestRegister = await prisma.registrationRequest.create({
+            data:{
+                name,
+                email,
+                tel,
+                question,
+                typeUser
+            }
+        })
+
+        return reply.status(201).send(requestRegister);
+    });
+
+    fastify.get('/request-register', async (request, reply) => {
+        const requests = await prisma.registrationRequest.findMany({
+            orderBy:{
+                createdAt: 'asc'
+            }
+        })
+
+        return {requests}
     })
 }

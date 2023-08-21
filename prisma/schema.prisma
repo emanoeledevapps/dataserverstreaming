@@ -172,3 +172,13 @@ model Quote {
   reservedBy String?
   createdAt  DateTime @default(now())
 }
+
+model RegistrationRequest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  tel       String
+  question  String
+  typeUser  String
+  createdAt DateTime @default(now())
+}
