@@ -149,5 +149,34 @@ export async function userRoutes(fastify: FastifyInstance){
         })
 
         return {requests}
+    });
+
+    fastify.put('/user/on-blockchain', async (request, reply) => {
+        const requestProps = z.object({
+            userWallet: z.string()
+        });
+
+        const {userWallet} = requestProps.parse(request.body);
+
+        const user = await prisma.user.findUnique({
+            where:{
+                wallet: userWallet.toUpperCase()
+            }
+        })
+
+        if(!user){
+            return reply.status(400).send({error: 'user not found'})
+        }
+
+        await prisma.user.update({
+            where:{
+                wallet: userWallet.toUpperCase()
+            },
+            data:{
+                onBlockchain: true
+            }
+        })
+
+        return reply.status(200).send();
     })
 }
