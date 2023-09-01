@@ -71,6 +71,7 @@ model Post {
   bannerAlt   String
   bodyPost    String
   language    String
+  views       Int      @default(0)
   createdAt   DateTime @default(now())
 }
 

@@ -67,5 +67,44 @@ export async function blogRoutes(fastify: FastifyInstance){
         });
 
         return {post}
-    })
+    });
+
+    fastify.get('/posts/most-seen', async (request, reply) => {
+
+        const posts = await prisma.post.findMany({
+            orderBy: {
+                views: 'desc'
+            }
+        });
+
+        return {posts}
+    });
+
+    fastify.put('/post/view', async (request, reply) => {
+        const requestProps = z.object({
+            id: z.string()
+        })
+
+        const {id} = requestProps.parse(request.body);
+
+        const postDetails = await prisma.post.findUnique({
+            where:{
+                id
+            }
+        });
+
+        const post = await prisma.post.update({
+            where:{
+                id
+            },
+            data:{
+                views: Number(postDetails?.views) + 1
+            },
+            select:{
+                views: true
+            }
+        });
+
+        return reply.status(200).send({post})
+    });
 }
