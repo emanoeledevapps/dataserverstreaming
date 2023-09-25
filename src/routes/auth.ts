@@ -14,10 +14,11 @@ export async function authRoutes(fastify: FastifyInstance){
             password: z.string().optional(),
             imgProfileUrl: z.string().optional(),
             address: z.string().optional(),
-            level: z.number()
+            level: z.number(),
+            origin: z.string().optional()
         });
     
-        const {name, wallet, userType, geoLocation, propertyGeolocation, password, imgProfileUrl, address, level} = createUserProps.parse(request.body);
+        const {name, wallet, userType, geoLocation, propertyGeolocation, password, imgProfileUrl, address, level, origin} = createUserProps.parse(request.body);
 
         const userExists = await prisma.user.findUnique({
             where:{
@@ -26,7 +27,9 @@ export async function authRoutes(fastify: FastifyInstance){
         })
 
         if(userExists) {
-            return reply.status(500).send()
+            return reply.status(500).send({
+                error: 'User already exists'
+            });
         }
 
         const passwordHash = await hash(String(password), 8)
@@ -43,7 +46,17 @@ export async function authRoutes(fastify: FastifyInstance){
                 address,
                 level
             }
-        })
+        });
+
+        if(origin === 'externo'){
+            await prisma.transactionQueue.create({
+                data:{
+                    wallet: String(wallet).toUpperCase(),
+                    type: 'register',
+                    finished: false
+                }
+            })
+        }
     
         return reply.status(201).send()
     })

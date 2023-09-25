@@ -110,6 +110,7 @@ model Impact {
   agua   Int
   bio    Int
   solo   Int
+  value  Int?
 }
 
 model TokensBurned {
@@ -183,4 +184,11 @@ model RegistrationRequest {
   question  String
   typeUser  String
   createdAt DateTime @default(now())
+}
+
+model TransactionQueue {
+  id       String  @id @default(cuid())
+  wallet   String
+  type     String
+  finished Boolean
 }

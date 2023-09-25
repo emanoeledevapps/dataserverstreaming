@@ -11,14 +11,15 @@ export async function impactRoutes(fastify: FastifyInstance){
 
     fastify.put('/network-impact', async (request, reply) => {
         const updateProps = z.object({
-            carbon: z.number(),
-            agua: z.number(),
-            bio: z.number(),
-            solo: z.number(),
+            carbon: z.number().optional(),
+            agua: z.number().optional(),
+            bio: z.number().optional(),
+            solo: z.number().optional(),
+            value: z.number().optional(),
             id: z.string()
         });
 
-        const {carbon, agua, bio, solo, id} = updateProps.parse(request.body);
+        const {carbon, agua, bio, solo, value, id} = updateProps.parse(request.body);
 
         await prisma.impact.update({
             where:{
@@ -28,7 +29,8 @@ export async function impactRoutes(fastify: FastifyInstance){
                 carbon,
                 agua,
                 bio, 
-                solo
+                solo,
+                value
             }
         })
     })

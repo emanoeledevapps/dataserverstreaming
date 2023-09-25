@@ -58,6 +58,27 @@ export async function notificationRoutes(fastify: FastifyInstance){
             return reply.status(200).send();
         }
 
+        if(group === 'inspectors'){
+            const inspectors = await prisma.user.findMany({
+                where: {
+                    userType: 2,
+                }
+            })
+
+            for(var i = 0; i < inspectors.length; i++){
+                await prisma.notification.create({
+                    data:{
+                        for: inspectors[i].wallet,
+                        from: from?.toUpperCase(),
+                        type,
+                        data
+                    }
+                })
+            }
+
+            return reply.status(200).send();
+        }
+
         const notification = await prisma.notification.create({
             data:{
                 for: to.toUpperCase(),
