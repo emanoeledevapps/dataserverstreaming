@@ -14,13 +14,14 @@ export async function transactionQueueRoutes(fastify: FastifyInstance){
         const transactions = await prisma.transactionQueue.findMany({
             where:{
                 wallet: wallet.toUpperCase(),
+                finished: false
             }
         });
 
         return {transactions}
     });
 
-    fastify.put('/transaction-open/finish', async (request, reply) => {
+    fastify.put('/transactions-open/finish', async (request, reply) => {
         const requestProps = z.object({
             id: z.string(),
         });
