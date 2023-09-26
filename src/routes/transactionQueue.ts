@@ -18,5 +18,24 @@ export async function transactionQueueRoutes(fastify: FastifyInstance){
         });
 
         return {transactions}
+    });
+
+    fastify.put('/transaction-open/finish', async (request, reply) => {
+        const requestProps = z.object({
+            id: z.string(),
+        });
+
+        const {id} = requestProps.parse(request.body);
+
+        await prisma.transactionQueue.update({
+            where:{
+                id
+            },
+            data:{
+                finished: true
+            }
+        });
+
+        return reply.status(200).send()
     })
 }
