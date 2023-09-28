@@ -27,6 +27,7 @@ model User {
   Delations     Delation[]
   Inspections   Inspection[]
   Notifications Notification[]
+  Publications  Publication[]
 }
 
 model Delation {
@@ -191,4 +192,42 @@ model TransactionQueue {
   wallet   String
   type     String
   finished Boolean
+}
+
+//Models da rede social
+
+model Publication {
+  id             String   @id @default(cuid())
+  userId         String
+  description    String?
+  images         String?
+  type           String
+  origin         String
+  additionalData String?
+  createdAt      DateTime @default(now())
+
+  user                User                 @relation(fields: [userId], references: [id])
+  CommentsPublication CommentPublication[]
+  LikesPublication    LikePublication[]
+}
+
+model CommentPublication {
+  id            String   @id @default(cuid())
+  text          String
+  userId        String
+  userData      String
+  publicationId String
+  createdAt     DateTime @default(now())
+
+  publi Publication @relation(fields: [publicationId], references: [id])
+}
+
+model LikePublication {
+  id            String   @id @default(cuid())
+  userId        String
+  userData      String
+  publicationId String
+  createdAt     DateTime @default(now())
+
+  publi Publication @relation(fields: [publicationId], references: [id])
 }
