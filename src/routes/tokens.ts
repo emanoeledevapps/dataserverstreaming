@@ -32,7 +32,7 @@ export async function tokensRoutes(fastify: FastifyInstance){
                 bio, 
                 soil
             }
-        })
+        });
 
         return reply.status(201).send();
     })

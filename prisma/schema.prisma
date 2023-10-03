@@ -28,6 +28,8 @@ model User {
   Inspections   Inspection[]
   Notifications Notification[]
   Publications  Publication[]
+  Followers     Followers[]
+  Following     Following[]
 }
 
 model Delation {
@@ -230,4 +232,22 @@ model LikePublication {
   createdAt     DateTime @default(now())
 
   publi Publication @relation(fields: [publicationId], references: [id])
+}
+
+model Followers {
+  id         String   @id @default(cuid())
+  userId     String
+  followerId String
+  createdAt  DateTime @default(now())
+
+  follower User @relation(fields: [userId], references: [id])
+}
+
+model Following {
+  id         String   @id @default(cuid())
+  userId     String
+  followerId String
+  createdAt  DateTime @default(now())
+
+  following User @relation(fields: [userId], references: [id])
 }
