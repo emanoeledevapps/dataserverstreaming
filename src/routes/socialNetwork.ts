@@ -45,6 +45,30 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return {publications}
     });
 
+    // Rotas de likes
+    fastify.get('/publications/:userId', {onRequest: [authenticated]}, async (request, reply) => {
+        const requestProps = z.object({
+            userId: z.string(),
+        });
+
+        const {userId} = requestProps.parse(request.params);
+
+        const publications = await prisma.publication.findMany({
+            where:{
+                userId
+            },
+            orderBy:{
+                createdAt: 'desc'
+            },
+            include:{
+                CommentsPublication: true,
+                LikesPublication: true
+            }
+        });
+
+        return {publications}
+    });
+
     fastify.post('/publication/like', {onRequest: [authenticated]}, async (request, reply) => {
         const requestProps = z.object({
             idPubli: z.string(),
@@ -53,6 +77,17 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         });
 
         const {idPubli, userData, userId} = requestProps.parse(request.body);
+
+        const likeExist = await prisma.likePublication.findFirst({
+            where:{
+                publicationId: idPubli,
+                userId
+            }
+        });
+
+        if(likeExist){
+            return reply.status(500).send({error: 'User is liked publi'});
+        }
 
         const like = await prisma.likePublication.create({
             data:{
@@ -105,6 +140,8 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send(likes);
     });
 
+    //Rotas de seguidores
+
     fastify.post('/follow', {onRequest: [authenticated]}, async (request, reply) => {
         const requestProps = z.object({
             userId: z.string(),
@@ -112,6 +149,17 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         });
 
         const {userId, userToFollowId} = requestProps.parse(request.body);
+
+        const followExists = await prisma.followers.findFirst({
+            where:{
+                userId: userToFollowId,
+                followerId: userId
+            }
+        });
+
+        if(followExists){
+            return reply.status(500).send({error: 'User is follow'})
+        }
 
         await prisma.followers.create({
             data:{
@@ -189,5 +237,44 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
             followers,
             following
         }
-    })
+    });
+
+    //Rotas dos comentários
+    fastify.post('/publication/comment', {onRequest: [authenticated]}, async (request, reply) => {
+        const requestProps = z.object({
+            text: z.string(),
+            userData: z.string(),
+            userId: z.string(),
+            publicationId: z.string(),
+        });
+
+        const {text, userData, userId, publicationId} = requestProps.parse(request.body);
+
+        const comment = await prisma.commentPublication.create({
+            data:{
+                text,
+                userData,
+                userId,
+                publicationId
+            }
+        });
+
+        return reply.status(201).send({comment});
+    });
+
+    fastify.get('/comments/:publicationId', {onRequest: [authenticated]}, async (request, reply) => {
+        const requestProps = z.object({
+            publicationId: z.string(),
+        });
+
+        const {publicationId} = requestProps.parse(request.params);
+
+        const comments = await prisma.commentPublication.findMany({
+            where:{
+                publicationId
+            }
+        });
+
+        return reply.status(200).send({comments});
+    });
 }

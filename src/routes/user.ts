@@ -178,5 +178,9 @@ export async function userRoutes(fastify: FastifyInstance){
         })
 
         return reply.status(200).send();
-    })
+    });
+
+    fastify.get('/teste-web3', async (request, reply) => {
+        
+    });
 }
