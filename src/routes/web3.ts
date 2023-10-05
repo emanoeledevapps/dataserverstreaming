@@ -1,0 +1,265 @@
+import {FastifyInstance} from 'fastify';
+import { prisma } from '../lib/prisma';
+import {z} from 'zod';
+import { authenticated } from '../plugins/authenticated';
+import { 
+    GetInspections, 
+    GetProducers, 
+    GetInspectors, 
+    GetResearchers, 
+    GetDevelopers,
+    GetTokensPerEraProducersPool,
+    GetCurrentEraContractProducerPool,
+    GetBalanceContractProducerPool,
+    GetBalanceContractDevelopersPool,
+    GetEraContractDevelopersPool,
+    GetTokensPerEraDevelopersPool,
+    GetCertificateTokens,
+    GetInvestor,
+    GetInvestors
+} from '../plugins/web3';
+
+export async function web3Routes(fastify: FastifyInstance){
+    fastify.get('/web3/all-inspections', async (request, reply) => {
+        const response = await GetInspections();
+        
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const status = Number(String(response[i]?.status).replace('n',''));
+
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                createdBy: response[i]?.createdBy,
+                acceptedBy: response[i]?.acceptedBy,
+                isaScore: Number(String(response[i]?.isaScore).replace('n','')),
+                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
+                createdAtTimestamp: Number(String(response[i]?.createdAtTimestamp).replace('n','')),
+                acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
+                acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
+                inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
+                status
+            }
+
+            newArray.push(data);
+        }
+
+        
+        return reply.status(200).send({inspections: newArray})
+    });
+
+    fastify.get('/web3/history-inspections', async (request, reply) => {
+        const response = await GetInspections();
+        
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const status = Number(String(response[i]?.status).replace('n',''))
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                createdBy: response[i]?.createdBy,
+                acceptedBy: response[i]?.acceptedBy,
+                isaScore: Number(String(response[i]?.isaScore).replace('n','')),
+                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
+                createdAtTimestamp: Number(String(response[i]?.createdAtTimestamp).replace('n','')),
+                acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
+                acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
+                inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
+                status
+            }
+
+            if(status === 2){
+                newArray.push(data);
+            }
+        }
+
+        
+        return reply.status(200).send({inspections: newArray})
+    });
+
+    fastify.get('/web3/producers', async (request, reply) => {
+        const response = await GetProducers();
+        
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                producerWallet: response[i]?.producerWallet,
+                userType: Number(String(response[i]?.userType).replace('n','')),
+                certifiedArea: Number(String(response[i]?.certifiedArea).replace('n','')),
+                name: response[i]?.name,
+                proofPhoto: response[i]?.proofPhoto,
+                recentInspection: response[i]?.recentInspection,
+                totalInspections: Number(String(response[i]?.totalInspections).replace('n','')),
+                lastRequestAt: Number(String(response[i]?.lastRequestAt).replace('n','')),
+                isa:{
+                    isaScore: Number(String(response[i]?.isa?.isaScore).replace('n','')),
+                    isaAverage: Number(String(response[i]?.isa?.isaAverage).replace('n','')),
+                    sustainable: response[i]?.isa?.sustainable
+                },
+                propertyAddress: {
+                    coordinate: response[i]?.propertyAddress?.coordinate
+                },
+                pool:{
+                    currentEra: Number(String(response[i]?.pool?.currentEra).replace('n','')),
+                }
+            }
+
+            newArray.push(data);
+        }
+
+        let ranking = newArray.map(item => item ).sort((a, b) => b.isa.isaScore - a.isa.isaScore);
+
+        return reply.status(200).send({producers: ranking})
+    });
+
+    fastify.get('/web3/inspectors', async (request, reply) => {
+        const response = await GetInspectors();
+        
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                inspectorWallet: response[i]?.activistWallet,
+                userType: Number(String(response[i]?.userType).replace('n','')),
+                name: response[i]?.name,
+                proofPhoto: response[i]?.proofPhoto,
+                totalInspections: Number(String(response[i]?.totalInspections).replace('n','')),
+                giveUps: Number(String(response[i]?.giveUps).replace('n','')),
+                lastAcceptedAt: Number(String(response[i]?.lastAcceptedAt).replace('n','')),
+                inspectorAddress: {
+                    coordinate: response[i]?.activistAddress?.coordinate
+                },
+            }
+
+            newArray.push(data);
+        }
+
+        let ranking = newArray.map(item => item ).sort((a, b) => b.totalInspections - a.totalInspections);
+
+        return reply.status(200).send({inspectors: ranking})
+    });
+
+    fastify.get('/web3/researchers', async (request, reply) => {
+        const response = await GetResearchers();
+        
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                researcherWallet: response[i]?.researcherWallet,
+                userType: Number(String(response[i]?.userType).replace('n','')),
+                name: response[i]?.name,
+                proofPhoto: response[i]?.proofPhoto,
+                publishedWorks: Number(String(response[i]?.publishedWorks).replace('n','')),
+            }
+
+            newArray.push(data);
+        }
+
+        let ranking = newArray.map(item => item ).sort((a, b) => b.publishedWorks - a.publishedWorks);
+
+        return reply.status(200).send({researchers: ranking})
+    });
+
+    fastify.get('/web3/developers', async (request, reply) => {
+        const response = await GetDevelopers();
+    
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                developerWallet: response[i]?.developerWallet,
+                userType: Number(String(response[i]?.userType).replace('n','')),
+                name: response[i]?.name,
+                proofPhoto: response[i]?.proofPhoto,
+                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
+                pool:{
+                    level: Number(String(response[i]?.pool?.level).replace('n','')),
+                    currentEra: Number(String(response[i]?.pool?.currentEra).replace('n','')),
+                }
+            }
+
+            newArray.push(data);
+        }
+
+        let ranking = newArray.map(item => item ).sort((a, b) => b.pool.level - a.pool.level);
+        
+        return reply.status(200).send({developers: ranking})
+    });
+
+    fastify.get('/web3/investors', async (request, reply) => {
+        const response = await GetInvestors();
+       
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const resTokens = await GetCertificateTokens(response[i]?.investorWallet);
+
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                investorWallet: response[i]?.investorWallet,
+                userType: Number(String(response[i]?.userType).replace('n','')),
+                name: response[i]?.name,
+                tokensBurned: Number(Number(String(resTokens).replace('n','')) / 10 ** 18)
+            }
+
+            newArray.push(data);
+        }
+
+        let ranking = newArray.map(item => item ).sort((a, b) => b.tokensBurned - a.tokensBurned);
+
+        return reply.status(200).send({investors: ranking})
+    });
+
+    fastify.get('/web3/pool-producers-data', async (request, reply) => {
+        const response1 = await GetTokensPerEraProducersPool();
+        const response2 = await GetCurrentEraContractProducerPool();
+        const response3 = await GetBalanceContractProducerPool();
+
+        const tokensPerEra = Number(String(response1).replace('n',''));
+        const currentEraContract = Number(String(response2).replace('n',''));
+        const balanceContract = Number(String(response3).replace('n',''));
+
+        return reply.status(200).send({
+            tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
+            currentEraContract,
+            balanceContract: Number(balanceContract / 10 ** 18).toFixed(0)
+        })
+    });
+
+    fastify.get('/web3/pool-developers-data', async (request, reply) => {
+        const response1 = await GetTokensPerEraDevelopersPool();
+        const response2 = await GetEraContractDevelopersPool();
+        const response3 = await GetBalanceContractDevelopersPool();
+
+        const tokensPerEra = Number(String(response1).replace('n',''));
+        const currentEraContract = Number(String(response2).replace('n',''));
+        const balanceContract = Number(String(response3).replace('n',''));
+
+        return reply.status(200).send({
+            tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
+            currentEraContract,
+            balanceContract: Number(balanceContract / 10 ** 18).toFixed(0)
+        })
+    });
+
+    //Contribuição
+    fastify.get('/web3/contributions/:walletUser', async (request, reply) => {
+        const requestProps = z.object({
+            walletUser: z.string(),
+        });
+
+        const {walletUser} = requestProps.parse(request.params);
+
+        const investor = await GetInvestor(walletUser);
+        
+        const response1 = await GetCertificateTokens(walletUser);
+        
+
+        const tokensBurned = Number(String(response1).replace('n',''));
+        
+
+        return reply.status(200).send({
+            tokensBurned: Number(tokensBurned / 10 ** 18).toFixed(0),
+            linkQrCode: `https://v4-sintrop.netlify.app/account-investor/${walletUser.toLowerCase()}`
+        })
+    });
+}

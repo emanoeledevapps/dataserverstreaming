@@ -15,6 +15,7 @@ import { notificationRoutes } from './routes/notification';
 import { quoteRoutes } from './routes/quote';
 import { transactionQueueRoutes } from './routes/transactionQueue';
 import { socialNetworkRoutes } from './routes/socialNetwork';
+import { web3Routes } from './routes/web3';
 
 const app = fastify();
 app.register(cors, {
@@ -34,6 +35,7 @@ app.register(notificationRoutes);
 app.register(quoteRoutes);
 app.register(transactionQueueRoutes);
 app.register(socialNetworkRoutes);
+app.register(web3Routes);
 
 app.register(jwt, {
     secret: process.env.JWT_SECRET_KEY || '123456'

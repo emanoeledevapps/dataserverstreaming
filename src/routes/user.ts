@@ -2,6 +2,7 @@ import {FastifyInstance} from 'fastify';
 import { prisma } from '../lib/prisma';
 import {z} from 'zod';
 import { authenticated } from '../plugins/authenticated';
+import { GetInspections } from '../plugins/web3';
 
 export async function userRoutes(fastify: FastifyInstance){
     fastify.get('/me', {onRequest: [authenticated]},async (request, reply) => {
@@ -178,9 +179,5 @@ export async function userRoutes(fastify: FastifyInstance){
         })
 
         return reply.status(200).send();
-    });
-
-    fastify.get('/teste-web3', async (request, reply) => {
-        
     });
 }
