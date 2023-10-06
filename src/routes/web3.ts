@@ -16,7 +16,10 @@ import {
     GetTokensPerEraDevelopersPool,
     GetCertificateTokens,
     GetInvestor,
-    GetInvestors
+    GetInvestors,
+    GetCurrentBlockNumber,
+    GetInspection,
+    GetIsa
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
@@ -47,12 +50,44 @@ export async function web3Routes(fastify: FastifyInstance){
         return reply.status(200).send({inspections: newArray})
     });
 
+    fastify.get('/web3/inspection/:id', async (request, reply) => {
+        const requestProps = z.object({
+            id: z.string()
+        });
+
+        const {id} = requestProps.parse(request.params);
+
+        const inspection = await GetInspection(id);
+        const isaData = await GetIsa(id);
+
+        const userData = await prisma.user.findFirst({
+            where:{
+                wallet: String(inspection?.createdBy).toUpperCase()
+            }
+        });
+
+        const inspectionApiData = await prisma.inspection.findFirst({
+            where:{
+                inspectionId: id
+            }
+        });
+        
+        return reply.status(200).send({
+            inspection,
+            isaData,
+            userData,
+            inspectionApiData
+        })
+    });
+
     fastify.get('/web3/history-inspections', async (request, reply) => {
         const response = await GetInspections();
+        const blockNumber = await GetCurrentBlockNumber();
         
         let newArray = [];
         for(var i = 0; i < response.length; i++){
             const status = Number(String(response[i]?.status).replace('n',''))
+
             const data = {
                 id: Number(String(response[i]?.id).replace('n','')),
                 createdBy: response[i]?.createdBy,
@@ -66,13 +101,61 @@ export async function web3Routes(fastify: FastifyInstance){
                 status
             }
 
+            if(status === 1){
+                if(Number(response[i]?.acceptedAt) + Number(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION) < Number(blockNumber)){
+                    newArray.push({
+                        ...data,
+                        status: 3
+                    });
+                }
+            }
+
             if(status === 2){
                 newArray.push(data);
             }
         }
 
+        let ranking = newArray.map(item => item ).sort((a, b) => b.inspectedAtTimestamp - a.inspectedAtTimestamp);
+
+        return reply.status(200).send({inspections: ranking})
+    });
+
+    fastify.get('/web3/manage-inspections', async (request, reply) => {
+        const response = await GetInspections();
+        const blockNumber = await GetCurrentBlockNumber();
         
-        return reply.status(200).send({inspections: newArray})
+        let newArray = [];
+        for(var i = 0; i < response.length; i++){
+            const status = Number(String(response[i]?.status).replace('n',''))
+
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                createdBy: response[i]?.createdBy,
+                acceptedBy: response[i]?.acceptedBy,
+                isaScore: Number(String(response[i]?.isaScore).replace('n','')),
+                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
+                createdAtTimestamp: Number(String(response[i]?.createdAtTimestamp).replace('n','')),
+                acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
+                acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
+                inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
+                status
+            }
+
+            if(status === 0){
+                newArray.push(data)
+            }
+            if(status === 1){
+                if(Number(response[i]?.acceptedAt) + Number(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION) < Number(blockNumber)){
+                    
+                }else{
+                    newArray.push(data);
+                }
+            }
+        }
+
+        let ranking = newArray.map(item => item ).sort((a, b) => b.createdAtTimestamp - a.createdAtTimestamp);
+
+        return reply.status(200).send({inspections: ranking})
     });
 
     fastify.get('/web3/producers', async (request, reply) => {

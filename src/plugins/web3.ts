@@ -34,9 +34,75 @@ const DevelopersPoolContract = new web3.eth.Contract(DevelopersPoolContractJson,
 const SACTokenContract = new web3.eth.Contract(SacTokenContractJson, SACTokenContractAddress);
 const InvestorContract = new web3.eth.Contract(InvestorContractJson, investorContractAddress);
 
+export const GetCurrentBlockNumber = async () => {
+    const response = await web3.eth.getBlockNumber();
+    return Number(String(response).replace('n',''))
+}
+
 export const GetInspections = async () => {
     const response = await SintropContract.methods.getInspections().call({from: sintropContractAddress})
     return response
+}
+
+export const GetInspection = async (id: string) => {
+    const response = await SintropContract.methods.getInspection(id).call({from: sintropContractAddress});
+
+    const status = Number(String(response?.status).replace('n',''));
+
+    const data = {
+        id: Number(String(response?.id).replace('n','')),
+        createdBy: response?.createdBy,
+        acceptedBy: response?.acceptedBy,
+        isaScore: Number(String(response?.isaScore).replace('n','')),
+        createdAt: Number(String(response?.createdAt).replace('n','')),
+        createdAtTimestamp: Number(String(response?.createdAtTimestamp).replace('n','')),
+        acceptedAt: Number(String(response?.acceptedAt).replace('n','')),
+        acceptedAtTimestamp: Number(String(response?.acceptedAtTimestamp).replace('n','')),
+        inspectedAtTimestamp: Number(String(response?.inspectedAtTimestamp).replace('n','')),
+        status
+    }
+
+    return data
+}
+
+export const GetIsa = async (inspectionId: string) => {
+    let newArrayIsas = [];
+
+    let carbon = {};
+    let water = {};
+    let soil = {};
+    let bio = {};
+
+    const response = await SintropContract.methods.getIsa(inspectionId).call({from: sintropContractAddress})
+    
+    for(var i = 0; i < response.length; i++) {
+        const categoryId = Number(String(response[i]?.categoryId).replace('n',''));
+
+        let data = {
+            categoryId,
+            isaIndex: Number(String(response[i]?.isaIndex).replace('n','')),
+            report: response[i]?.report,
+            indicator: Number(String(response[i]?.indicator).replace('n','')),
+        }
+
+        if(categoryId === 1){
+            carbon = data;
+        }
+
+        if(categoryId === 2){
+            bio = data;
+        }
+
+        if(categoryId === 3){
+            water = data;
+        }
+
+        if(categoryId === 4){
+            soil = data;
+        }
+    }
+    
+    return {carbon, soil, water, bio};
 }
 
 export const GetProducers = async () => {

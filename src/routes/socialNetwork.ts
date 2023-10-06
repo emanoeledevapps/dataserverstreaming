@@ -5,7 +5,7 @@ import {hash, compare} from 'bcryptjs';
 import { authenticated } from '../plugins/authenticated';
 
 export async function socialNetworkRoutes(fastify: FastifyInstance){
-    fastify.post('/publication/new', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.post('/publication/new', async (request, reply) => {
         const requestProps = z.object({
             userId: z.string(),
             type: z.string(),
