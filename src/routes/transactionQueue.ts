@@ -4,6 +4,27 @@ import {z} from 'zod';
 import {hash, compare} from 'bcryptjs';
 
 export async function transactionQueueRoutes(fastify: FastifyInstance){
+    fastify.post('/transactions-open/create', async (request, reply) => {
+        const requestProps = z.object({
+            wallet: z.string(),
+            type: z.string(),
+            additionalData: z.string().optional(),
+        });
+
+        const {wallet, type, additionalData} = requestProps.parse(request.body);
+
+        const transaction = await prisma.transactionQueue.create({
+            data:{
+                wallet: wallet.toUpperCase(),
+                finished: false,
+                type,
+                additionalData
+            }
+        });
+
+        return {transaction}
+    });
+
     fastify.get('/transactions-open/:wallet', async (request, reply) => {
         const requestProps = z.object({
             wallet: z.string()

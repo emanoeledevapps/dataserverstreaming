@@ -60,6 +60,7 @@ model Inspection {
   biodversityIndice String?
   methodType        String?
   zones             String?
+  resultInspection  String?
 
   user User @relation(fields: [userWallet], references: [wallet])
 }
@@ -190,10 +191,11 @@ model RegistrationRequest {
 }
 
 model TransactionQueue {
-  id       String  @id @default(cuid())
-  wallet   String
-  type     String
-  finished Boolean
+  id             String  @id @default(cuid())
+  wallet         String
+  type           String
+  finished       Boolean
+  additionalData String?
 }
 
 //Models da rede social

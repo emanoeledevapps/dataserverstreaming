@@ -208,4 +208,26 @@ export async function inspectionRoutes(fastify: FastifyInstance){
         })
         return {inspections}
     });
+
+    fastify.put('/update-result', async (request, reply) => {
+        const updateProps = z.object({
+            id: z.string(),
+            result: z.string()
+        })
+
+        const {id, result} = updateProps.parse(request.body);
+
+        
+        
+        await prisma.inspection.update({
+            where: {
+                inspectionId: id
+            },
+            data:{
+                resultInspection: result
+            }
+        })
+
+        return reply.status(200).send()
+    })
 }
