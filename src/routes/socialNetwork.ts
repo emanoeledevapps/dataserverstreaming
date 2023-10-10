@@ -140,6 +140,28 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send(likes);
     });
 
+    fastify.get('/check-liked/:userId/:publiId', {onRequest: [authenticated]}, async (request, reply) => {
+        const requestProps = z.object({
+            userId: z.string(),
+            publiId: z.string(),
+        });
+
+        const {userId, publiId} = requestProps.parse(request.params);
+
+        const liked = await prisma.likePublication.findFirst({
+            where:{
+                userId,
+                publicationId: publiId,
+            }
+        });
+
+        if(liked){
+            return reply.status(200).send({liked: true});
+        }else{
+            return reply.status(200).send({liked: false});
+        }
+    });
+
     //Rotas de seguidores
 
     fastify.post('/follow', {onRequest: [authenticated]}, async (request, reply) => {
@@ -236,6 +258,28 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return {
             followers,
             following
+        }
+    });
+
+    fastify.get('/check-following/:userId/:userToFollowId', {onRequest: [authenticated]}, async (request, reply) => {
+        const requestProps = z.object({
+            userId: z.string(),
+            userToFollowId: z.string(),
+        });
+
+        const {userId, userToFollowId} = requestProps.parse(request.params);
+
+        const following = await prisma.following.findFirst({
+            where:{
+                userId,
+                followerId: userToFollowId
+            }
+        });
+
+        if(following){
+            return reply.status(200).send({following: true});
+        }else{
+            return reply.status(200).send({following: false});
         }
     });
 

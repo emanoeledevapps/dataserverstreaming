@@ -69,9 +69,10 @@ export async function authRoutes(fastify: FastifyInstance){
     
         const {wallet, password} = createUserProps.parse(request.body);
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
             where:{
                 wallet: String(wallet).toUpperCase(),
+                onBlockchain: true
             }
         })
 
