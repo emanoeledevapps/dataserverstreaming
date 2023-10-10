@@ -19,35 +19,15 @@ import {
     GetInvestors,
     GetCurrentBlockNumber,
     GetInspection,
-    GetIsa
+    GetIsa,
+    GetProducer
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
     fastify.get('/web3/all-inspections', async (request, reply) => {
         const response = await GetInspections();
         
-        let newArray = [];
-        for(var i = 0; i < response.length; i++){
-            const status = Number(String(response[i]?.status).replace('n',''));
-
-            const data = {
-                id: Number(String(response[i]?.id).replace('n','')),
-                createdBy: response[i]?.createdBy,
-                acceptedBy: response[i]?.acceptedBy,
-                isaScore: Number(String(response[i]?.isaScore).replace('n','')),
-                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
-                createdAtTimestamp: Number(String(response[i]?.createdAtTimestamp).replace('n','')),
-                acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
-                acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
-                inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
-                status
-            }
-
-            newArray.push(data);
-        }
-
-        
-        return reply.status(200).send({inspections: newArray})
+        return reply.status(200).send({inspections: response});
     });
 
     fastify.get('/web3/inspection/:id', async (request, reply) => {
@@ -295,11 +275,10 @@ export async function web3Routes(fastify: FastifyInstance){
     fastify.get('/web3/pool-producers-data', async (request, reply) => {
         const response1 = await GetTokensPerEraProducersPool();
         const response2 = await GetCurrentEraContractProducerPool();
-        const response3 = await GetBalanceContractProducerPool();
+        const balanceContract = await GetBalanceContractProducerPool();
 
         const tokensPerEra = Number(String(response1).replace('n',''));
         const currentEraContract = Number(String(response2).replace('n',''));
-        const balanceContract = Number(String(response3).replace('n',''));
 
         return reply.status(200).send({
             tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
@@ -311,11 +290,11 @@ export async function web3Routes(fastify: FastifyInstance){
     fastify.get('/web3/pool-developers-data', async (request, reply) => {
         const response1 = await GetTokensPerEraDevelopersPool();
         const response2 = await GetEraContractDevelopersPool();
-        const response3 = await GetBalanceContractDevelopersPool();
+        const balanceContract = await GetBalanceContractDevelopersPool();
 
         const tokensPerEra = Number(String(response1).replace('n',''));
         const currentEraContract = Number(String(response2).replace('n',''));
-        const balanceContract = Number(String(response3).replace('n',''));
+        
 
         return reply.status(200).send({
             tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
@@ -343,6 +322,44 @@ export async function web3Routes(fastify: FastifyInstance){
         return reply.status(200).send({
             tokensBurned: Number(tokensBurned / 10 ** 18).toFixed(0),
             linkQrCode: `https://v4-sintrop.netlify.app/account-investor/${walletUser.toLowerCase()}`
+        })
+    });
+
+    fastify.get('/web3/producer-data/:walletUser', async (request, reply) => {
+        const requestProps = z.object({
+            walletUser: z.string(),
+        });
+
+        const {walletUser} = requestProps.parse(request.params);
+
+        const producer = await GetProducer(walletUser.toLowerCase());
+        const inspections = await GetInspections();
+        const inspectionsFinished = inspections.filter(item => item.status === 2);
+        const inspectionsUser = inspectionsFinished.filter(item => String(item.createdBy).toLowerCase() === walletUser.toLowerCase());
+
+        let totalCarbon = 0;
+        let totalWater = 0;
+        let totalBio = 0;
+        let totalSoil = 0;
+
+        for(var i = 0; i < inspectionsUser.length; i++){
+
+            const inspectionId = inspectionsUser[i].id;
+            const response = await GetIsa(String(inspectionId));
+
+            totalCarbon += Number(response?.carbon?.indicator);
+            totalWater += Number(response?.water?.indicator);
+            totalBio += Number(response?.bio?.indicator);
+            totalSoil += Number(response?.soil?.indicator);
+        }
+
+        return reply.status(200).send({
+            producer,
+            totalCarbon, 
+            totalWater, 
+            totalBio, 
+            totalSoil,
+            linkQrCode: `https://v4-sintrop.netlify.app/account-producer/${walletUser}`
         })
     });
 }

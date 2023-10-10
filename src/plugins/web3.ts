@@ -40,8 +40,28 @@ export const GetCurrentBlockNumber = async () => {
 }
 
 export const GetInspections = async () => {
-    const response = await SintropContract.methods.getInspections().call({from: sintropContractAddress})
-    return response
+    const response = await SintropContract.methods.getInspections().call({from: sintropContractAddress});
+
+    let newArray = [];
+    for(var i = 0; i < response.length; i++){
+            const status = Number(String(response[i]?.status).replace('n',''));
+
+            const data = {
+                id: Number(String(response[i]?.id).replace('n','')),
+                createdBy: response[i]?.createdBy,
+                acceptedBy: response[i]?.acceptedBy,
+                isaScore: Number(String(response[i]?.isaScore).replace('n','')),
+                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
+                createdAtTimestamp: Number(String(response[i]?.createdAtTimestamp).replace('n','')),
+                acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
+                acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
+                inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
+                status
+            }
+
+            newArray.push(data);
+    }
+    return newArray;
 }
 
 export const GetInspection = async (id: string) => {
@@ -110,6 +130,35 @@ export const GetProducers = async () => {
     return producers;
 }
 
+export const GetProducer = async (wallet: string) => {
+    const producer = await ProducerContract.methods.getProducer(wallet).call();
+    
+    const data = {
+        id: Number(String(producer?.id).replace('n','')),
+        producerWallet: producer?.producerWallet,
+        userType: Number(String(producer?.userType).replace('n','')),
+        certifiedArea: Number(String(producer?.certifiedArea).replace('n','')),
+        name: producer?.name,
+        proofPhoto: producer?.proofPhoto,
+        recentInspection: producer?.recentInspection,
+        totalInspections: Number(String(producer?.totalInspections).replace('n','')),
+        lastRequestAt: Number(String(producer?.lastRequestAt).replace('n','')),
+        isa: {
+            isaScore: Number(String(producer?.isa?.isaScore).replace('n','')),
+            isaAverage: Number(String(producer?.isa?.isaAverage).replace('n','')),
+            sustainable: producer?.isa?.sustainable
+        },
+        propertyAddress: {
+            coordinate: producer?.propertyAddress?.coordinate
+        },
+        pool: { 
+            currentEra: Number(String(producer?.pool?.currentEra).replace('n','')) 
+        }
+    }
+
+    return data;
+}
+
 export const GetInspectors = async () => {
     const inspectors = await InspectorContract.methods.getActivists().call()
     return inspectors;
@@ -142,14 +191,16 @@ export const GetCurrentEraContractProducerPool = async () => {
 }
 
 export const GetBalanceContractProducerPool = async () => {
-    const response = await ProducerPoolContract.methods.balance().call({from: producerPoolContractAddress})
-    return response;
+    const response = await ProducerPoolContract.methods.balance().call({from: producerPoolContractAddress});
+    const balance = Number(String(response).replace('n',''));
+    return balance;
 }
 
 //Pool developers
 export const GetBalanceContractDevelopersPool = async () => {
     const response = await DevelopersPoolContract.methods.balance().call({from: developersPoolContractAddress})
-    return response;
+    const balance = Number(String(response).replace('n',''));
+    return balance;
 }
 
 export const GetEraContractDevelopersPool = async () => {
