@@ -19,7 +19,8 @@ import { web3Routes } from './routes/web3';
 
 const app = fastify();
 app.register(cors, {
-    origin: true
+    origin: '*',
+
 });
 
 app.register(userRoutes);
