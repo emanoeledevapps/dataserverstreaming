@@ -15,8 +15,8 @@ import {
     GetEraContractDevelopersPool,
     GetTokensPerEraDevelopersPool,
     GetCertificateTokens,
-    GetInvestor,
-    GetInvestors,
+    GetSupporters,
+    GetSupporter,
     GetCurrentBlockNumber,
     GetInspection,
     GetIsa,
@@ -181,7 +181,7 @@ export async function web3Routes(fastify: FastifyInstance){
         for(var i = 0; i < response.length; i++){
             const data = {
                 id: Number(String(response[i]?.id).replace('n','')),
-                inspectorWallet: response[i]?.activistWallet,
+                inspectorWallet: response[i]?.inspectorWallet,
                 userType: Number(String(response[i]?.userType).replace('n','')),
                 name: response[i]?.name,
                 proofPhoto: response[i]?.proofPhoto,
@@ -250,15 +250,15 @@ export async function web3Routes(fastify: FastifyInstance){
     });
 
     fastify.get('/web3/investors', async (request, reply) => {
-        const response = await GetInvestors();
+        const response = await GetSupporters();
        
         let newArray = [];
         for(var i = 0; i < response.length; i++){
-            const resTokens = await GetCertificateTokens(response[i]?.investorWallet);
+            const resTokens = await GetCertificateTokens(response[i]?.supporterWallet);
 
             const data = {
                 id: Number(String(response[i]?.id).replace('n','')),
-                investorWallet: response[i]?.investorWallet,
+                investorWallet: response[i]?.supporterWallet,
                 userType: Number(String(response[i]?.userType).replace('n','')),
                 name: response[i]?.name,
                 tokensBurned: Number(Number(String(resTokens).replace('n','')) / 10 ** 18)
@@ -311,7 +311,7 @@ export async function web3Routes(fastify: FastifyInstance){
 
         const {walletUser} = requestProps.parse(request.params);
 
-        const investor = await GetInvestor(walletUser);
+        const investor = await GetSupporter(walletUser);
         
         const response1 = await GetCertificateTokens(walletUser);
         
@@ -321,7 +321,7 @@ export async function web3Routes(fastify: FastifyInstance){
 
         return reply.status(200).send({
             tokensBurned: Number(tokensBurned / 10 ** 18).toFixed(0),
-            linkQrCode: `https://v4-sintrop.netlify.app/account-investor/${walletUser.toLowerCase()}`
+            linkQrCode: `https://v5-sintrop.netlify.app/account-investor/${walletUser.toLowerCase()}`
         })
     });
 
@@ -359,7 +359,7 @@ export async function web3Routes(fastify: FastifyInstance){
             totalWater, 
             totalBio, 
             totalSoil,
-            linkQrCode: `https://v4-sintrop.netlify.app/account-producer/${walletUser}`
+            linkQrCode: `https://v5-sintrop.netlify.app/account-producer/${walletUser}`
         })
     });
 }

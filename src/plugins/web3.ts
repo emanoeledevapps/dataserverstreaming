@@ -6,23 +6,23 @@ import ResearcherContractJson from '../abis/ResearcherContract.json';
 import DeveloperContractJson from '../abis/DeveloperContract.json';
 import ProducerPoolContractJson from '../abis/ProducerPool.json';
 import DevelopersPoolContractJson from '../abis/DeveloperPool.json';
-import SacTokenContractJson from '../abis/SacToken.json';
-import InvestorContractJson from '../abis/InvestorContract.json'
+import RcTokenContractJson from '../abis/RcToken.json';
+import SupporterContractJson from '../abis/SupporterContract.json'
 
 //initializing contract
 
 const provider = `https://sepolia.infura.io/v3/e46d8ac23f55416a9c93c0efa005450a`
 const web3 = new Web3(provider);
 
-const sintropContractAddress = '0x6ff3e655a639e35d9194228aa42879ae7ddf7dd8';
-const producerContractAddress = '0x693161f1e90270ba156179128f49c285c89447e7';
-const inspectorContractAddress = '0xa289fabc5764f91ac56575f7f048038faa3d059d';
-const researcherContractAddress = '0x5c5553b494cc350f1a31e1f91832a3ed19df1627';
-const developerContractAddress = '0x0c9aa6894d586fbfd246b7633cde1ced544120f4';
-const producerPoolContractAddress = '0x0751c7e08e53a55a1ed24fe1467d9a0ceb8ef95e';
-const developersPoolContractAddress = '0x5703e8a25a6bcd2a989f28a3cfd39cfc9ae06718';
-const SACTokenContractAddress = '0xF8033Bbfe9c645F52d170DDD733274371E75369F';
-const investorContractAddress = '0x8014eef23614d357010685787690d3e7c2cfcc30';
+const sintropContractAddress = '0x9f26e5AB2B9C36F9e6a4088380FB13D92dD0d12c';
+const producerContractAddress = '0x0Eac8F15B96292507694F5885344fe8D437013a6';
+const inspectorContractAddress = '0x34938C273c8C27f46E5ACf4D98AAD5DF4a7130D7';
+const researcherContractAddress = '0xf7dF2a28273e47544a4f4F581B41FF349907d153';
+const developerContractAddress = '0x23e1fF307094520a878E327516C31A7a02D65ac1';
+const producerPoolContractAddress = '0x12dfc8027A2Fc644586e8E2946349053A91A8Ad7';
+const developersPoolContractAddress = '0x1a6129DFF9B6dB0475D054fd991e85E1227d10DC';
+const RcTokenContractAddress = '0xF6Ac9B2365B1c44Ef221824A02885d4E0e35ECD3';
+const supporterContractAddress = '0xc0A8fE26cd04f5CA68C9a56615d416618229085F';
 
 const SintropContract = new web3.eth.Contract(SintropContractJson, sintropContractAddress);
 const ProducerContract = new web3.eth.Contract(ProducerContractJson, producerContractAddress);
@@ -31,8 +31,8 @@ const ResearcherContract = new web3.eth.Contract(ResearcherContractJson, researc
 const DeveloperContract = new web3.eth.Contract(DeveloperContractJson, developerContractAddress);
 const ProducerPoolContract = new web3.eth.Contract(ProducerPoolContractJson, producerPoolContractAddress);
 const DevelopersPoolContract = new web3.eth.Contract(DevelopersPoolContractJson, developersPoolContractAddress);
-const SACTokenContract = new web3.eth.Contract(SacTokenContractJson, SACTokenContractAddress);
-const InvestorContract = new web3.eth.Contract(InvestorContractJson, investorContractAddress);
+const RcTokenContract = new web3.eth.Contract(RcTokenContractJson, RcTokenContractAddress);
+const SupporterContract = new web3.eth.Contract(SupporterContractJson, supporterContractAddress);
 
 export const GetCurrentBlockNumber = async () => {
     const response = await web3.eth.getBlockNumber();
@@ -160,7 +160,7 @@ export const GetProducer = async (wallet: string) => {
 }
 
 export const GetInspectors = async () => {
-    const inspectors = await InspectorContract.methods.getActivists().call()
+    const inspectors = await InspectorContract.methods.getInspectors().call()
     return inspectors;
 }
 
@@ -174,9 +174,9 @@ export const GetDevelopers = async () => {
     return developers;
 }
 
-export const GetInvestors = async () => {
-    const investors = await InvestorContract.methods.getInvestors().call()
-    return investors;
+export const GetSupporters = async () => {
+    const supporters = await SupporterContract.methods.getSupporters().call()
+    return supporters;
 }
 
 //Pool producers
@@ -215,11 +215,11 @@ export const GetTokensPerEraDevelopersPool = async () => {
 
 //Contribuições
 export const GetCertificateTokens = async (wallet : string) => {
-    const response = await SACTokenContract.methods.certificate(wallet).call({from: SACTokenContractAddress})
+    const response = await RcTokenContract.methods.certificate(wallet).call({from: RcTokenContractAddress})
     return response;
 }
 
-export const GetInvestor = async (walletAdd: string) => {
-    const investor = await InvestorContract.methods.getInvestor(walletAdd).call()
-    return investor;
+export const GetSupporter = async (walletAdd: string) => {
+    const supporter = await SupporterContract.methods.getSupporter(walletAdd).call()
+    return supporter;
 }
