@@ -180,4 +180,34 @@ export async function userRoutes(fastify: FastifyInstance){
 
         return reply.status(200).send();
     });
+
+    fastify.put('/user/android-push-id', async (request, reply) => {
+        const requestProps = z.object({
+            wallet: z.string(),
+            pushId: z.string()
+        });
+
+        const {wallet, pushId} = requestProps.parse(request.body);
+
+        const user = await prisma.user.findUnique({
+            where:{
+                wallet: wallet.toUpperCase()
+            }
+        })
+
+        if(!user){
+            return reply.status(400).send({error: 'user not found'})
+        }
+
+        await prisma.user.update({
+            where:{
+                id: user.id
+            },
+            data:{
+                AndroidPushId: pushId
+            }
+        })
+
+        return reply.status(200).send();
+    });
 }

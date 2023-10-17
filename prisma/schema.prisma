@@ -23,6 +23,7 @@ model User {
   address             String?
   level               Int      @default(0)
   onBlockchain        Boolean  @default(false)
+  AndroidPushId       String?
 
   Delations     Delation[]
   Inspections   Inspection[]
