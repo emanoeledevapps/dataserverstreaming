@@ -14,15 +14,15 @@ import SupporterContractJson from '../abis/SupporterContract.json'
 const provider = `https://sepolia.infura.io/v3/e46d8ac23f55416a9c93c0efa005450a`
 const web3 = new Web3(provider);
 
-const sintropContractAddress = '0x9f26e5AB2B9C36F9e6a4088380FB13D92dD0d12c';
-const producerContractAddress = '0x0Eac8F15B96292507694F5885344fe8D437013a6';
-const inspectorContractAddress = '0x34938C273c8C27f46E5ACf4D98AAD5DF4a7130D7';
-const researcherContractAddress = '0xf7dF2a28273e47544a4f4F581B41FF349907d153';
-const developerContractAddress = '0x23e1fF307094520a878E327516C31A7a02D65ac1';
-const producerPoolContractAddress = '0x12dfc8027A2Fc644586e8E2946349053A91A8Ad7';
-const developersPoolContractAddress = '0x1a6129DFF9B6dB0475D054fd991e85E1227d10DC';
-const RcTokenContractAddress = '0xF6Ac9B2365B1c44Ef221824A02885d4E0e35ECD3';
-const supporterContractAddress = '0xc0A8fE26cd04f5CA68C9a56615d416618229085F';
+const sintropContractAddress = '0x92f3606B7Cb0BAabD21a400f745f1Fd22E6352c3';
+const producerContractAddress = '0x96e79BB32124Ee4Cd61399E1959898990D3153ca';
+const inspectorContractAddress = '0x1EF8403A2241F933DC9C159d87dBf54B17efE369';
+const researcherContractAddress = '0xDe3794d71Ae604D6e54C0841760fD55f2022e2c4';
+const developerContractAddress = '0xDc9228762f3d5f503A30C1889E988c5727be29dE';
+const producerPoolContractAddress = '0xBED5CB25c85CF2c2e1Bf72Ec07ce75323A70e3d0';
+const developersPoolContractAddress = '0x2Dfe9759A6186c00C7ACC15f843c106e80704eb5';
+const RcTokenContractAddress = '0x8e1d1e636a5f8a7237fa6fddbd4ba8299371095c';
+const supporterContractAddress = '0x31e883c3f18C92F42fD93CffE1fe207E7a078180';
 
 const SintropContract = new web3.eth.Contract(SintropContractJson, sintropContractAddress);
 const ProducerContract = new web3.eth.Contract(ProducerContractJson, producerContractAddress);
