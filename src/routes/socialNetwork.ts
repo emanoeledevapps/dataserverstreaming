@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma';
 import {z} from 'zod';
 import {hash, compare} from 'bcryptjs';
 import { authenticated } from '../plugins/authenticated';
+import axios from 'axios';
 
 export async function socialNetworkRoutes(fastify: FastifyInstance){
     fastify.post('/publication/new', async (request, reply) => {
@@ -69,14 +70,35 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return {publications}
     });
 
+    fastify.get('/publication/:publiId', {onRequest: [authenticated]}, async (request, reply) => {
+        const requestProps = z.object({
+            publiId: z.string(),
+        });
+
+        const {publiId} = requestProps.parse(request.params);
+
+        const publication = await prisma.publication.findUnique({
+            where:{
+                id: publiId,
+            },
+            include:{
+                CommentsPublication: true,
+                LikesPublication: true
+            }
+        });
+
+        return {publication}
+    });
+
     fastify.post('/publication/like', {onRequest: [authenticated]}, async (request, reply) => {
         const requestProps = z.object({
             idPubli: z.string(),
             userData: z.string(),
-            userId: z.string()
+            userId: z.string(),
+            ownerId: z.string().optional(),
         });
 
-        const {idPubli, userData, userId} = requestProps.parse(request.body);
+        const {idPubli, userData, userId, ownerId} = requestProps.parse(request.body);
 
         const likeExist = await prisma.likePublication.findFirst({
             where:{
@@ -96,6 +118,38 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
                 userId
             }
         });
+
+        const ownerPubli = await prisma.user.findUnique({
+            where:{
+                id: ownerId
+            }
+        });
+
+        if(ownerPubli?.AndroidPushId){
+            let idsForPush = [];
+            idsForPush.push(ownerPubli.AndroidPushId);
+            const userLike = JSON.parse(userData);
+
+            await axios.post('https://onesignal.com/api/v1/notifications',{
+                app_id: process.env.ONESIGNAL_APP_ID,
+                include_player_ids: idsForPush,
+                data:{
+                    foo: `${userLike?.name} curtiu sua publicação`,
+                    publiId: idPubli,
+                },
+                // headings:{
+                //     en: `${userLike?.name} curtiu sua publicação`
+                // },
+                contents:{
+                    en: `${userLike?.name} curtiu sua publicação`
+                },
+            },{
+                headers:{
+                    'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                }
+            })
+        }
+
 
         return reply.status(201).send(like);
     });
@@ -290,9 +344,10 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
             userData: z.string(),
             userId: z.string(),
             publicationId: z.string(),
+            ownerId: z.string().optional()
         });
 
-        const {text, userData, userId, publicationId} = requestProps.parse(request.body);
+        const {text, userData, userId, publicationId, ownerId} = requestProps.parse(request.body);
 
         const comment = await prisma.commentPublication.create({
             data:{
@@ -302,6 +357,37 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
                 publicationId
             }
         });
+
+        const ownerPubli = await prisma.user.findUnique({
+            where:{
+                id: ownerId
+            }
+        });
+
+        if(ownerPubli?.AndroidPushId){
+            let idsForPush = [];
+            idsForPush.push(ownerPubli.AndroidPushId);
+            const userComment = JSON.parse(userData);
+
+            await axios.post('https://onesignal.com/api/v1/notifications',{
+                app_id: process.env.ONESIGNAL_APP_ID,
+                include_player_ids: idsForPush,
+                data:{
+                    foo: `${userComment?.name} comentou na sua publicação`,
+                    publiId: publicationId,
+                },
+                // headings:{
+                //     en: `${userComment?.name} comentou na sua publicação`
+                // },
+                contents:{
+                    en: `${userComment?.name} comentou na sua publicação`
+                },
+            },{
+                headers:{
+                    'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                }
+            })
+        }
 
         return reply.status(201).send({comment});
     });

@@ -23,6 +23,7 @@
     "@fastify/cors": "^8.2.0",
     "@fastify/jwt": "^6.7.1",
     "@prisma/client": "^4.11.0",
+    "axios": "^1.5.1",
     "bcryptjs": "^2.4.3",
     "ethers": "^6.7.1",
     "fastify": "^4.14.1",
