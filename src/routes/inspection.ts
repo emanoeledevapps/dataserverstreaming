@@ -2,6 +2,7 @@ import {FastifyInstance} from 'fastify';
 import { prisma } from '../lib/prisma';
 import {z} from 'zod';
 import { authenticated } from '../plugins/authenticated';
+import axios from 'axios';
 
 export async function inspectionRoutes(fastify: FastifyInstance){
     fastify.post('/inspections', async (request, reply) => {
@@ -23,7 +24,43 @@ export async function inspectionRoutes(fastify: FastifyInstance){
                 propertyData,
                 userWallet
             }
-        })
+        });
+
+        const producerData = await prisma.user.findFirst({
+            where:{
+                wallet: createdBy.toUpperCase(),
+            }
+        });
+
+        const inspectorData = await prisma.user.findFirst({
+            where:{
+                wallet: userWallet.toUpperCase(),
+            }
+        });
+
+        if(producerData?.AndroidPushId && producerData?.AndroidPushId !== ''){
+            let idsForPush = [];
+            idsForPush.push(producerData.AndroidPushId);
+
+            await axios.post('https://onesignal.com/api/v1/notifications',{
+                app_id: process.env.ONESIGNAL_APP_ID,
+                include_player_ids: idsForPush,
+                data:{
+                    foo: `${inspectorData?.name} Aceitou sua inspeção`,
+                    type: 'accept-inspection'
+                },
+                // headings:{
+                //     en: `${inspectorData?.name} Aceitou sua inspeção`
+                // },
+                contents:{
+                    en: `${inspectorData?.name} Aceitou sua inspeção`
+                },
+            },{
+                headers:{
+                    'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                }
+            })
+        }
     
         return reply.status(201).send()
     });
