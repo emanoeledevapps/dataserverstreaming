@@ -267,13 +267,15 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
             let idsForPush = [];
             idsForPush.push(userToFollow.AndroidPushId);
 
+            const user = await JSON.stringify(userRequest);
+
             await axios.post('https://onesignal.com/api/v1/notifications',{
                 app_id: process.env.ONESIGNAL_APP_ID,
                 include_player_ids: idsForPush,
                 data:{
                     foo: `${userRequest?.name} começou a seguir você`,
                     type: 'new-follower',
-                    user: JSON.stringify(userRequest)
+                    user
                 },
                 contents:{
                     en: `${userRequest?.name} começou a seguir você`
