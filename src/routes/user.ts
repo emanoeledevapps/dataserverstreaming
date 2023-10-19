@@ -18,7 +18,7 @@ export async function userRoutes(fastify: FastifyInstance){
     fastify.get('/users', async (request, reply) => {
         const users = await prisma.user.findMany({
             orderBy:{
-                createdAt: 'asc'
+                createdAt: 'desc'
             }
         });
         return {users}
