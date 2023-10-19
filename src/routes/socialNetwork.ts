@@ -251,6 +251,40 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
             }
         });
 
+        const userRequest = await prisma.user.findUnique({
+            where:{
+                id: userId
+            }
+        });
+
+        const userToFollow = await prisma.user.findUnique({
+            where: {
+                id: userToFollowId
+            }
+        });
+
+        if(userToFollow?.AndroidPushId){
+            let idsForPush = [];
+            idsForPush.push(userToFollow.AndroidPushId);
+
+            await axios.post('https://onesignal.com/api/v1/notifications',{
+                app_id: process.env.ONESIGNAL_APP_ID,
+                include_player_ids: idsForPush,
+                data:{
+                    foo: `${userRequest?.name} começou a seguir você`,
+                    type: 'new-follower',
+                    user: JSON.stringify(userRequest)
+                },
+                contents:{
+                    en: `${userRequest?.name} começou a seguir você`
+                },
+            },{
+                headers:{
+                    'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                }
+            })
+        }
+
         return reply.status(201).send();
     });
 

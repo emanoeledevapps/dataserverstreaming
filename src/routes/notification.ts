@@ -1,6 +1,7 @@
 import {FastifyInstance} from 'fastify';
 import { prisma } from '../lib/prisma';
 import {z} from 'zod';
+import axios from 'axios'
 
 export async function notificationRoutes(fastify: FastifyInstance){
     fastify.get('/notifications/:walletUser', async (request, reply) => {
@@ -59,13 +60,26 @@ export async function notificationRoutes(fastify: FastifyInstance){
         }
 
         if(group === 'inspectors'){
+            let idsForPush = [];
+
+            const userData = await prisma.user.findFirst({
+                where:{
+                    wallet: from?.toUpperCase(),
+                }
+            });
+
             const inspectors = await prisma.user.findMany({
                 where: {
                     userType: 2,
                 }
-            })
+            });
 
             for(var i = 0; i < inspectors.length; i++){
+                if(inspectors[i].AndroidPushId){
+                    if(inspectors[i].AndroidPushId !== ''){
+                        idsForPush.push(inspectors[i].AndroidPushId);
+                    }
+                }
                 await prisma.notification.create({
                     data:{
                         for: inspectors[i].wallet,
@@ -76,7 +90,113 @@ export async function notificationRoutes(fastify: FastifyInstance){
                 })
             }
 
+            //Push onesignal
+            if(type === 'request-inspection'){
+                await axios.post('https://onesignal.com/api/v1/notifications',{
+                    app_id: process.env.ONESIGNAL_APP_ID,
+                    include_player_ids: idsForPush,
+                    data:{
+                        foo: `${userData?.name} solicitou uma nova inspeção`,
+                        type: "request-inspection"
+                    },
+                    // headings:{
+                    //     en: `${userData?.name} solicitou uma inspeção`
+                    // },
+                    contents:{
+                        en: `${userData?.name} solicitou uma nova inspeção`
+                    },
+                },{
+                    headers:{
+                        'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                    }
+                })
+            }
+
             return reply.status(200).send();
+        }
+
+        if(type === 'accept-inspection'){
+            let idsForPush = [];
+            
+            const producerData = await prisma.user.findFirst({
+                where: {
+                    wallet: to.toUpperCase()
+                }
+            });
+
+            const inspectorData = await prisma.user.findFirst({
+                where: {
+                    wallet: from?.toUpperCase()
+                }
+            });
+
+            if(producerData?.AndroidPushId){
+                idsForPush.push(producerData.AndroidPushId);
+
+                await axios.post('https://onesignal.com/api/v1/notifications',{
+                    app_id: process.env.ONESIGNAL_APP_ID,
+                    include_player_ids: idsForPush,
+                    data:{
+                        foo: `${inspectorData?.name} aceitou sua inspeção`,
+                        type: "accept-inspection"
+                    },
+                    // headings:{
+                    //     en: `${inspectorData?.name} solicitou uma inspeção`
+                    // },
+                    contents:{
+                        en: `${inspectorData?.name} aceitou sua inspeção`
+                    },
+                },{
+                    headers:{
+                        'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                    }
+                })
+
+            }
+
+        }
+
+        if(type === 'finalize-inspection'){
+            let idsForPush = [];
+            const additionalData = JSON.parse(data);
+
+            const producerData = await prisma.user.findFirst({
+                where: {
+                    wallet: to.toUpperCase()
+                }
+            });
+
+            const inspectorData = await prisma.user.findFirst({
+                where: {
+                    wallet: from?.toUpperCase()
+                }
+            });
+
+            if(producerData?.AndroidPushId){
+                idsForPush.push(producerData.AndroidPushId);
+
+                await axios.post('https://onesignal.com/api/v1/notifications',{
+                    app_id: process.env.ONESIGNAL_APP_ID,
+                    include_player_ids: idsForPush,
+                    data:{
+                        foo: `${inspectorData?.name} finalizou sua inspeção na Blockchain`,
+                        type: "finalize-inspection",
+                        inspectionId: additionalData?.inspectionId
+                    },
+                    // headings:{
+                    //     en: `${inspectorData?.name} solicitou uma inspeção`
+                    // },
+                    contents:{
+                        en: `${inspectorData?.name} finalizou sua inspeção na Blockchain`
+                    },
+                },{
+                    headers:{
+                        'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
+                    }
+                })
+
+            }
+
         }
 
         const notification = await prisma.notification.create({
