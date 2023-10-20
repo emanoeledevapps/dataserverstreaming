@@ -60,6 +60,20 @@ export async function web3Routes(fastify: FastifyInstance){
         })
     });
 
+    fastify.get('/web3/inspection/isas/:id', async (request, reply) => {
+        const requestProps = z.object({
+            id: z.string()
+        });
+
+        const {id} = requestProps.parse(request.params);
+
+        const isaData = await GetIsa(id);
+        
+        return reply.status(200).send({
+            isaData
+        })
+    });
+
     fastify.get('/web3/history-inspections', async (request, reply) => {
         const response = await GetInspections();
         const blockNumber = await GetCurrentBlockNumber();
