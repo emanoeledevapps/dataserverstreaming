@@ -100,6 +100,22 @@ export async function web3Routes(fastify: FastifyInstance){
         return reply.status(200).send({inspections: ranking})
     });
 
+    fastify.get('/web3/blocks-to-expire/:id', async (request, reply) => {
+        const requestProps = z.object({
+            id: z.string(),
+        });
+
+        const {id} = requestProps.parse(request.params);
+
+        const response = await GetInspection(id);
+        const blockNumber = await GetCurrentBlockNumber();
+        console.log(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION)
+        
+        const expiresIn = (Number(response.acceptedAt) + Number(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION)) - Number(blockNumber);        
+
+        return reply.status(200).send({expiresIn})
+    });
+
     fastify.get('/web3/manage-inspections', async (request, reply) => {
         const response = await GetInspections();
         const blockNumber = await GetCurrentBlockNumber();
