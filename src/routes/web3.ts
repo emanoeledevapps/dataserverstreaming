@@ -20,7 +20,8 @@ import {
     GetCurrentBlockNumber,
     GetInspection,
     GetIsa,
-    GetProducer
+    GetProducer,
+    GetResearches
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
@@ -391,5 +392,14 @@ export async function web3Routes(fastify: FastifyInstance){
             totalSoil,
             linkQrCode: `https://v5-sintrop.netlify.app/account-producer/${walletUser}`
         })
+    });
+
+    //pesquisadores
+    fastify.get('/web3/researches', async (request, reply) => {
+        const response = await GetResearches();
+
+        let order = response.map(item => item ).sort((a, b) => b.createdAtTimeStamp - a.createdAtTimeStamp);
+        
+        return reply.status(200).send({researches: order});
     });
 }

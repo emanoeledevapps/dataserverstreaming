@@ -223,3 +223,24 @@ export const GetSupporter = async (walletAdd: string) => {
     const supporter = await SupporterContract.methods.getSupporter(walletAdd).call()
     return supporter;
 }
+
+//pesquisadores
+export const GetResearches = async () => {
+    const researches = await ResearcherContract.methods.getWorks().call();
+
+    let newArray = [];
+
+    for(var i = 0; i < researches.length; i++) {
+        const data = {
+            id: Number(String(researches[i].id).replace('n','')),
+            createdBy: researches[i].createdBy,
+            title: researches[i].title,
+            thesis: researches[i].thesis,
+            file: researches[i].file,
+            createdAtTimeStamp: Number(String(researches[i].createdAtTimeStamp).replace('n',''))
+        }
+        newArray.push(data);
+    }
+
+    return newArray; 
+}
