@@ -124,11 +124,27 @@ export async function web3Routes(fastify: FastifyInstance){
 
         const response = await GetInspection(id);
         const blockNumber = await GetCurrentBlockNumber();
-        console.log(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION)
         
         const expiresIn = (Number(response.acceptedAt) + Number(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION)) - Number(blockNumber);        
 
         return reply.status(200).send({expiresIn})
+    });
+
+    fastify.get('/web3/era-info', async (request, reply) => {
+        const blockNumber = await GetCurrentBlockNumber();
+        const blocksPerEra = 192000;
+        const startBlock = 4513319;
+
+        const era2Start = startBlock + (blocksPerEra * 1);
+        const era3Start = startBlock + (blocksPerEra * 2);
+
+        let eraAtual = 1;
+        let nextEraIn = era2Start - blockNumber
+
+        return reply.status(200).send({
+            eraAtual,
+            nextEraIn
+        })
     });
 
     fastify.get('/web3/manage-inspections', async (request, reply) => {
