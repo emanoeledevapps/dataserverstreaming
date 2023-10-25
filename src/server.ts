@@ -18,7 +18,7 @@ import { socialNetworkRoutes } from './routes/socialNetwork';
 import { web3Routes } from './routes/web3';
 import { configRoutes } from './routes/config';
 
-const app = fastify();
+const app = fastify({logger: true});
 app.register(cors, {
     origin: '*',
 

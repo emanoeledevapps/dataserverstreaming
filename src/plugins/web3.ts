@@ -7,7 +7,9 @@ import DeveloperContractJson from '../abis/DeveloperContract.json';
 import ProducerPoolContractJson from '../abis/ProducerPool.json';
 import DevelopersPoolContractJson from '../abis/DeveloperPool.json';
 import RcTokenContractJson from '../abis/RcToken.json';
-import SupporterContractJson from '../abis/SupporterContract.json'
+import SupporterContractJson from '../abis/SupporterContract.json';
+import InspectorPoolContractJson from '../abis/InspectorPool.json';
+import ResearcherPoolContractJson from '../abis/ResearcherPool.json';
 
 //initializing contract
 
@@ -23,6 +25,8 @@ const producerPoolContractAddress = '0xBED5CB25c85CF2c2e1Bf72Ec07ce75323A70e3d0'
 const developersPoolContractAddress = '0x2Dfe9759A6186c00C7ACC15f843c106e80704eb5';
 const RcTokenContractAddress = '0x8e1d1e636a5f8a7237fa6fddbd4ba8299371095c';
 const supporterContractAddress = '0x31e883c3f18C92F42fD93CffE1fe207E7a078180';
+const inspectorPoolContractAddress = '0xa444cAAd6bC2C877bBD3b90B19446ADC0c19357F';
+const researcherPoolContractAddress = '0xBea7C40e5c27bbDECd83455B8CbeE8Fc57bd04E4';
 
 const SintropContract = new web3.eth.Contract(SintropContractJson, sintropContractAddress);
 const ProducerContract = new web3.eth.Contract(ProducerContractJson, producerContractAddress);
@@ -33,6 +37,8 @@ const ProducerPoolContract = new web3.eth.Contract(ProducerPoolContractJson, pro
 const DevelopersPoolContract = new web3.eth.Contract(DevelopersPoolContractJson, developersPoolContractAddress);
 const RcTokenContract = new web3.eth.Contract(RcTokenContractJson, RcTokenContractAddress);
 const SupporterContract = new web3.eth.Contract(SupporterContractJson, supporterContractAddress);
+const InspectorPoolContract = new web3.eth.Contract(InspectorPoolContractJson, inspectorPoolContractAddress);
+const ResearcherPoolContract = new web3.eth.Contract(ResearcherPoolContractJson, researcherPoolContractAddress);
 
 export const GetCurrentBlockNumber = async () => {
     const response = await web3.eth.getBlockNumber();
@@ -211,6 +217,44 @@ export const GetEraContractDevelopersPool = async () => {
 export const GetTokensPerEraDevelopersPool = async () => {
     const response = await DevelopersPoolContract.methods.TOKENS_PER_ERA().call({from: developersPoolContractAddress})
     return response;
+}
+
+//Pool inspetores
+export const GetTokensPerEraInspectorPool = async () => {
+    const response = await InspectorPoolContract.methods.tokensPerEra().call({from: inspectorPoolContractAddress})
+    const tokens = Number(String(response).replace('n',''));
+    return tokens;
+}
+
+export const GetCurrentEraContractInspectorPool = async () => {
+    const response = await InspectorPoolContract.methods.currentContractEra().call({from: inspectorPoolContractAddress})
+    const era = Number(String(response).replace('n',''));
+    return era;
+}
+
+export const GetBalanceContractInspectorPool = async () => {
+    const response = await InspectorPoolContract.methods.balance().call({from: inspectorPoolContractAddress});
+    const balance = Number(String(response).replace('n',''));
+    return balance;
+}
+
+//Pool pesquisadores
+export const GetTokensPerEraResearcherPool = async () => {
+    const response = await ResearcherPoolContract.methods.tokensPerEra().call({from: researcherPoolContractAddress})
+    const tokens = Number(String(response).replace('n',''));
+    return tokens;
+}
+
+export const GetCurrentEraContractResearcherPool = async () => {
+    const response = await ResearcherPoolContract.methods.currentContractEra().call({from: researcherPoolContractAddress})
+    const era = Number(String(response).replace('n',''));
+    return era;
+}
+
+export const GetBalanceContractResearcherPool = async () => {
+    const response = await ResearcherPoolContract.methods.balance().call({from: researcherPoolContractAddress});
+    const balance = Number(String(response).replace('n',''));
+    return balance;
 }
 
 //Contribuições

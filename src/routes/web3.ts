@@ -14,6 +14,12 @@ import {
     GetBalanceContractDevelopersPool,
     GetEraContractDevelopersPool,
     GetTokensPerEraDevelopersPool,
+    GetTokensPerEraInspectorPool,
+    GetCurrentEraContractInspectorPool,
+    GetBalanceContractInspectorPool,
+    GetTokensPerEraResearcherPool,
+    GetCurrentEraContractResearcherPool,
+    GetBalanceContractResearcherPool,
     GetCertificateTokens,
     GetSupporters,
     GetSupporter,
@@ -319,6 +325,8 @@ export async function web3Routes(fastify: FastifyInstance){
         return reply.status(200).send({investors: ranking})
     });
 
+    //pools
+
     fastify.get('/web3/pool-producers-data', async (request, reply) => {
         const response1 = await GetTokensPerEraProducersPool();
         const response2 = await GetCurrentEraContractProducerPool();
@@ -342,6 +350,30 @@ export async function web3Routes(fastify: FastifyInstance){
         const tokensPerEra = Number(String(response1).replace('n',''));
         const currentEraContract = Number(String(response2).replace('n',''));
         
+
+        return reply.status(200).send({
+            tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
+            currentEraContract,
+            balanceContract: Number(balanceContract / 10 ** 18).toFixed(0)
+        })
+    });
+
+    fastify.get('/web3/pool-inspectors-data', async (request, reply) => {
+        const tokensPerEra = await GetTokensPerEraInspectorPool();
+        const currentEraContract = await GetCurrentEraContractInspectorPool();
+        const balanceContract = await GetBalanceContractInspectorPool();
+
+        return reply.status(200).send({
+            tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
+            currentEraContract,
+            balanceContract: Number(balanceContract / 10 ** 18).toFixed(0)
+        })
+    });
+
+    fastify.get('/web3/pool-researchers-data', async (request, reply) => {
+        const tokensPerEra = await GetTokensPerEraResearcherPool();
+        const currentEraContract = await GetCurrentEraContractResearcherPool();
+        const balanceContract = await GetBalanceContractResearcherPool();
 
         return reply.status(200).send({
             tokensPerEra: Number(tokensPerEra / 10 ** 18).toFixed(0),
