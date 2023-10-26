@@ -27,7 +27,8 @@ import {
     GetInspection,
     GetIsa,
     GetProducer,
-    GetResearches
+    GetResearches,
+    GetBalanceUser
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
@@ -439,6 +440,27 @@ export async function web3Routes(fastify: FastifyInstance){
             totalBio, 
             totalSoil,
             linkQrCode: `https://v5-sintrop.netlify.app/account-producer/${walletUser}`
+        })
+    });
+
+    fastify.get('/web3/balance-tokens/:walletUser', async (request, reply) => {
+        const requestProps = z.object({
+            walletUser: z.string(),
+        });
+
+        const {walletUser} = requestProps.parse(request.params);
+
+        const response = await GetBalanceUser(walletUser.toLowerCase());
+
+        const balanceUser = Number(response) / 10 ** 18;
+        const price_rct_to_reais = 0.0282;
+        const balance_reais = balanceUser * price_rct_to_reais;
+
+        return reply.status(200).send({
+            balance: Number(balanceUser).toFixed(2).replace('.',','),
+            price_rct_to_reais,
+            price_rct_to_eth: 0.0000125,
+            balance_reais: balance_reais.toFixed(2).replace('.',',')
         })
     });
 

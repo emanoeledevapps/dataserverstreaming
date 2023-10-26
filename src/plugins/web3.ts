@@ -268,6 +268,12 @@ export const GetSupporter = async (walletAdd: string) => {
     return supporter;
 }
 
+export const GetBalanceUser = async (wallet: string) => {
+    const response = await RcTokenContract.methods.balanceOf(wallet).call({from: RcTokenContractAddress})
+    const balance = Number(String(response).replace('n',''));
+    return balance;
+}
+
 //pesquisadores
 export const GetResearches = async () => {
     const researches = await ResearcherContract.methods.getWorks().call();
