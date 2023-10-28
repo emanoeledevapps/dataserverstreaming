@@ -28,7 +28,8 @@ import {
     GetIsa,
     GetProducer,
     GetResearches,
-    GetBalanceUser
+    GetBalanceUser,
+    GetBalanceETH
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
@@ -471,5 +472,17 @@ export async function web3Routes(fastify: FastifyInstance){
         let order = response.map(item => item ).sort((a, b) => b.createdAtTimeStamp - a.createdAtTimeStamp);
         
         return reply.status(200).send({researches: order});
+    });
+
+    //user
+    fastify.get('/web3/balance-eth/:walletUser', async (request, reply) => {
+        const requestProps = z.object({
+            walletUser: z.string(),
+        });
+
+        const {walletUser} = requestProps.parse(request.params);
+        const response = await GetBalanceETH(walletUser.toLowerCase());
+        
+        return reply.status(200).send({balance_eth: response.toFixed(4)});
     });
 }

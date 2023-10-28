@@ -294,3 +294,10 @@ export const GetResearches = async () => {
 
     return newArray; 
 }
+
+export const GetBalanceETH = async (wallet: string) => {
+    const response = await web3.eth.getBalance(wallet);
+    
+    const balance = Number(String(response).replace('n','')) / 10**18;
+    return balance
+}
