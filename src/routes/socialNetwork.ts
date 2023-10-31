@@ -32,7 +32,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send({publication})
     });
 
-    fastify.get('/publications/get-all', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/publications/get-all', async (request, reply) => {
         const publications = await prisma.publication.findMany({
             orderBy:{
                 createdAt: 'desc'
@@ -47,7 +47,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
     });
 
     // Rotas de likes
-    fastify.get('/publications/:userId', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/publications/:userId', async (request, reply) => {
         const requestProps = z.object({
             userId: z.string(),
         });
@@ -70,7 +70,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return {publications}
     });
 
-    fastify.get('/publication/:publiId', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/publication/:publiId', async (request, reply) => {
         const requestProps = z.object({
             publiId: z.string(),
         });
@@ -178,7 +178,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send();
     });
 
-    fastify.get('/publication/like/:idPubli', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/publication/like/:idPubli', async (request, reply) => {
         const requestProps = z.object({
             idPubli: z.string(),
         });
@@ -194,7 +194,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send(likes);
     });
 
-    fastify.get('/check-liked/:userId/:publiId', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/check-liked/:userId/:publiId', async (request, reply) => {
         const requestProps = z.object({
             userId: z.string(),
             publiId: z.string(),
@@ -326,7 +326,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send();
     });
 
-    fastify.get('/followers/:userId', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/followers/:userId', async (request, reply) => {
         const requestProps = z.object({
             userId: z.string(),
         });
@@ -351,7 +351,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         }
     });
 
-    fastify.get('/check-following/:userId/:userToFollowId', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/check-following/:userId/:userToFollowId', async (request, reply) => {
         const requestProps = z.object({
             userId: z.string(),
             userToFollowId: z.string(),
@@ -428,7 +428,7 @@ export async function socialNetworkRoutes(fastify: FastifyInstance){
         return reply.status(201).send({comment});
     });
 
-    fastify.get('/comments/:publicationId', {onRequest: [authenticated]}, async (request, reply) => {
+    fastify.get('/comments/:publicationId', async (request, reply) => {
         const requestProps = z.object({
             publicationId: z.string(),
         });

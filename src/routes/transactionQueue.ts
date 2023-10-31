@@ -59,5 +59,5 @@ export async function transactionQueueRoutes(fastify: FastifyInstance){
         });
 
         return reply.status(200).send()
-    })
+    });
 }
