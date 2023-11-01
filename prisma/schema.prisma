@@ -192,11 +192,12 @@ model RegistrationRequest {
 }
 
 model TransactionQueue {
-  id             String  @id @default(cuid())
+  id             String   @id @default(cuid())
   wallet         String
   type           String
   finished       Boolean
   additionalData String?
+  createdAt      DateTime @default(now())
 }
 
 //Models da rede social

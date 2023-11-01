@@ -29,7 +29,8 @@ import {
     GetProducer,
     GetResearches,
     GetBalanceUser,
-    GetBalanceETH
+    GetBalanceETH,
+    GetValidationsInspection
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
@@ -91,30 +92,17 @@ export async function web3Routes(fastify: FastifyInstance){
         for(var i = 0; i < response.length; i++){
             const status = Number(String(response[i]?.status).replace('n',''))
 
-            const data = {
-                id: Number(String(response[i]?.id).replace('n','')),
-                createdBy: response[i]?.createdBy,
-                acceptedBy: response[i]?.acceptedBy,
-                isaScore: Number(String(response[i]?.isaScore).replace('n','')),
-                createdAt: Number(String(response[i]?.createdAt).replace('n','')),
-                createdAtTimestamp: Number(String(response[i]?.createdAtTimestamp).replace('n','')),
-                acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
-                acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
-                inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
-                status
-            }
-
             if(status === 1){
                 if(Number(response[i]?.acceptedAt) + Number(process.env.BLOCKS_TO_EXPIRE_ACCEPTED_INSPECTION) < Number(blockNumber)){
                     newArray.push({
-                        ...data,
+                        ...response[i],
                         status: 3
                     });
                 }
             }
 
             if(status === 2){
-                newArray.push(data);
+                newArray.push(response[i]);
             }
         }
 
@@ -484,5 +472,17 @@ export async function web3Routes(fastify: FastifyInstance){
         const response = await GetBalanceETH(walletUser.toLowerCase());
         
         return reply.status(200).send({balance_eth: response.toFixed(4)});
+    });
+
+    //validations
+    fastify.get('/web3/validations-inspection/:id', async (request, reply) => {
+        const requestProps = z.object({
+            id: z.string(),
+        });
+
+        const {id} = requestProps.parse(request.params);
+        const response = await GetValidationsInspection(id);
+        
+        return reply.status(200).send({});
     });
 }

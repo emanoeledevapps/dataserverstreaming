@@ -47,7 +47,7 @@ export const GetCurrentBlockNumber = async () => {
 
 export const GetInspections = async () => {
     const response = await SintropContract.methods.getInspections().call({from: sintropContractAddress});
-
+    console.log(response)
     let newArray = [];
     for(var i = 0; i < response.length; i++){
             const status = Number(String(response[i]?.status).replace('n',''));
@@ -62,7 +62,11 @@ export const GetInspections = async () => {
                 acceptedAt: Number(String(response[i]?.acceptedAt).replace('n','')),
                 acceptedAtTimestamp: Number(String(response[i]?.acceptedAtTimestamp).replace('n','')),
                 inspectedAtTimestamp: Number(String(response[i]?.inspectedAtTimestamp).replace('n','')),
-                status
+                status,
+                validationsCount: Number(String(response[i]?.validationsCount).replace('n','')),
+                inspectedAtEra: Number(String(response[i]?.inspectedAtEra).replace('n','')),
+                invalidatedAt: Number(String(response[i]?.invalidatedAt).replace('n','')),
+                invalidatedAtTimestamp: Number(String(response[i]?.invalidatedAtTimestamp).replace('n','')),
             }
 
             newArray.push(data);
@@ -72,7 +76,7 @@ export const GetInspections = async () => {
 
 export const GetInspection = async (id: string) => {
     const response = await SintropContract.methods.getInspection(id).call({from: sintropContractAddress});
-
+    
     const status = Number(String(response?.status).replace('n',''));
 
     const data = {
@@ -85,7 +89,11 @@ export const GetInspection = async (id: string) => {
         acceptedAt: Number(String(response?.acceptedAt).replace('n','')),
         acceptedAtTimestamp: Number(String(response?.acceptedAtTimestamp).replace('n','')),
         inspectedAtTimestamp: Number(String(response?.inspectedAtTimestamp).replace('n','')),
-        status
+        status,
+        validationsCount: Number(String(response?.validationsCount).replace('n','')),
+        inspectedAtEra: Number(String(response?.inspectedAtEra).replace('n','')),
+        invalidatedAt: Number(String(response?.invalidatedAt).replace('n','')),
+        invalidatedAtTimestamp: Number(String(response?.invalidatedAtTimestamp).replace('n','')),
     }
 
     return data
@@ -300,4 +308,12 @@ export const GetBalanceETH = async (wallet: string) => {
     
     const balance = Number(String(response).replace('n','')) / 10**18;
     return balance
+}
+
+//validations
+export const GetValidationsInspection = async (id: string) => {
+    const response = await SintropContract.methods.validations(1).call({from: sintropContractAddress})
+    console.log(response);
+    const balance = Number(String(response).replace('n',''));
+    return balance;
 }
