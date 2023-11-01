@@ -255,3 +255,10 @@ model Following {
 
   following User @relation(fields: [userId], references: [id])
 }
+
+model Config {
+  id             String  @id
+  minCodeVersion Int
+  linkCheckout   String
+  maintenance    Boolean
+}

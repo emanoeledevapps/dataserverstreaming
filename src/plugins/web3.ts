@@ -10,6 +10,7 @@ import RcTokenContractJson from '../abis/RcToken.json';
 import SupporterContractJson from '../abis/SupporterContract.json';
 import InspectorPoolContractJson from '../abis/InspectorPool.json';
 import ResearcherPoolContractJson from '../abis/ResearcherPool.json';
+import ValidatorContractJson from '../abis/ValidatorContract.json';
 
 //initializing contract
 
@@ -27,6 +28,7 @@ const RcTokenContractAddress = '0x8e1d1e636a5f8a7237fa6fddbd4ba8299371095c';
 const supporterContractAddress = '0x31e883c3f18C92F42fD93CffE1fe207E7a078180';
 const inspectorPoolContractAddress = '0xa444cAAd6bC2C877bBD3b90B19446ADC0c19357F';
 const researcherPoolContractAddress = '0xBea7C40e5c27bbDECd83455B8CbeE8Fc57bd04E4';
+const validatorContractAddress = '0x02C0C01D7E4d70D4511f437d9CA225674b240730';
 
 const SintropContract = new web3.eth.Contract(SintropContractJson, sintropContractAddress);
 const ProducerContract = new web3.eth.Contract(ProducerContractJson, producerContractAddress);
@@ -39,6 +41,7 @@ const RcTokenContract = new web3.eth.Contract(RcTokenContractJson, RcTokenContra
 const SupporterContract = new web3.eth.Contract(SupporterContractJson, supporterContractAddress);
 const InspectorPoolContract = new web3.eth.Contract(InspectorPoolContractJson, inspectorPoolContractAddress);
 const ResearcherPoolContract = new web3.eth.Contract(ResearcherPoolContractJson, researcherPoolContractAddress);
+const ValidatorContract = new web3.eth.Contract(ValidatorContractJson, validatorContractAddress);
 
 export const GetCurrentBlockNumber = async () => {
     const response = await web3.eth.getBlockNumber();
@@ -47,7 +50,7 @@ export const GetCurrentBlockNumber = async () => {
 
 export const GetInspections = async () => {
     const response = await SintropContract.methods.getInspections().call({from: sintropContractAddress});
-    console.log(response)
+    
     let newArray = [];
     for(var i = 0; i < response.length; i++){
             const status = Number(String(response[i]?.status).replace('n',''));
@@ -139,6 +142,8 @@ export const GetIsa = async (inspectionId: string) => {
     return {carbon, soil, water, bio};
 }
 
+//users
+
 export const GetProducers = async () => {
     const producers = await ProducerContract.methods.getProducers().call()
     return producers;
@@ -191,6 +196,21 @@ export const GetDevelopers = async () => {
 export const GetSupporters = async () => {
     const supporters = await SupporterContract.methods.getSupporters().call()
     return supporters;
+}
+
+export const GetValidators = async () => {
+    let validators = []
+    const response = await ValidatorContract.methods.getValidators().call()
+    for(var i = 0;  i < response.length; i++) {
+        const data = {
+            id: Number(String(response[i]?.id).replace('n','')),
+            validatorWallet: response[i].validatorWallet,
+            userType: 8
+        }
+
+        validators.push(data);
+    }
+    return validators;
 }
 
 //Pool producers

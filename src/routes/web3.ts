@@ -30,7 +30,8 @@ import {
     GetResearches,
     GetBalanceUser,
     GetBalanceETH,
-    GetValidationsInspection
+    GetValidationsInspection,
+    GetValidators
 } from '../plugins/web3';
 
 export async function web3Routes(fastify: FastifyInstance){
@@ -101,7 +102,7 @@ export async function web3Routes(fastify: FastifyInstance){
                 }
             }
 
-            if(status === 2){
+            if(status === 2 || status === 4){
                 newArray.push(response[i]);
             }
         }
@@ -181,6 +182,7 @@ export async function web3Routes(fastify: FastifyInstance){
         return reply.status(200).send({inspections: ranking})
     });
 
+    //Users
     fastify.get('/web3/producers', async (request, reply) => {
         const response = await GetProducers();
         
@@ -313,6 +315,12 @@ export async function web3Routes(fastify: FastifyInstance){
         let ranking = newArray.map(item => item ).sort((a, b) => b.tokensBurned - a.tokensBurned);
 
         return reply.status(200).send({investors: ranking})
+    });
+
+    fastify.get('/web3/validators', async (request, reply) => {
+        const response = await GetValidators();
+
+        return reply.status(200).send({validators: response})
     });
 
     //pools

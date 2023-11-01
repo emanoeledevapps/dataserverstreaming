@@ -8,4 +8,15 @@ export async function configRoutes(fastify: FastifyInstance){
             linkCheckout: process.env.LINK_CHECKOUT
         }
     })
+
+    fastify.get('/config_app', async (request, reply) => {
+
+        const config = await prisma.config.findFirst({ 
+            where: {
+                id: '1'
+            }
+        })
+
+        return reply.status(200).send({config})
+    })
 }
