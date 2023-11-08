@@ -38,7 +38,15 @@ export async function notificationRoutes(fastify: FastifyInstance){
 
         const {from, for: to, type, data, group} = notificationProps.parse(request.body);
 
+        const userFrom = await prisma.user.findFirst({
+            where:{
+                wallet: from?.toUpperCase()
+            }
+        })
+
         if(group === 'devs'){
+            let developersPushId = [];
+
             const developers = await prisma.user.findMany({
                 where: {
                     userType: 4,
@@ -52,6 +60,28 @@ export async function notificationRoutes(fastify: FastifyInstance){
                         from: from?.toUpperCase(),
                         type,
                         data
+                    }
+                })
+
+                if(developers[i].AndroidPushId){
+                    developersPushId.push(developers[i].AndroidPushId);
+                }
+            }
+
+            if(developersPushId.length > 0){
+                await axios.post('https://onesignal.com/api/v1/notifications',{
+                    app_id: process.env.ONESIGNAL_APP_ID,
+                    include_player_ids: developersPushId,
+                    data:{
+                        foo: `${userFrom?.name} criou uma nova task`,
+                        type: 'new-task',
+                    },
+                    contents:{
+                        en: `${userFrom?.name} criou uma nova task`
+                    },
+                },{
+                    headers:{
+                        'Authorization': `Basic ${process.env.ONESIGNAL_API_KEY}` 
                     }
                 })
             }
