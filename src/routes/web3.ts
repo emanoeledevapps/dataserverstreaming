@@ -234,7 +234,7 @@ export async function web3Routes(fastify: FastifyInstance){
                 giveUps: Number(String(response[i]?.giveUps).replace('n','')),
                 lastAcceptedAt: Number(String(response[i]?.lastAcceptedAt).replace('n','')),
                 inspectorAddress: {
-                    coordinate: response[i]?.activistAddress?.coordinate
+                    coordinate: response[i]?.inspectorAddress?.coordinate
                 },
             }
 
