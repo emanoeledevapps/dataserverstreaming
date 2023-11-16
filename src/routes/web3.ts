@@ -135,8 +135,8 @@ export async function web3Routes(fastify: FastifyInstance){
         const era2Start = startBlock + (blocksPerEra * 1);
         const era3Start = startBlock + (blocksPerEra * 2);
 
-        let eraAtual = 1;
-        let nextEraIn = era2Start - blockNumber
+        let eraAtual = 2;
+        let nextEraIn = era3Start - blockNumber
 
         return reply.status(200).send({
             eraAtual,
